@@ -1,6 +1,7 @@
 import { Trans } from "@lingui/solid/macro";
 import { styled } from "styled-system/jsx";
 
+import { ConnectionQualityBadge } from "@revolt/ferret/voice/ConnectionQuality"; // Ferret mod
 import { useVoice } from "@revolt/rtc";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
@@ -41,6 +42,8 @@ export function VoiceCallCardStatus(props: { pip?: boolean }) {
     <Status status={voice.state()} pip={props.pip}>
       <Symbol>{symbol()}</Symbol>{" "}
       <FadeOut fade={voice.state() === "CONNECTED"}>{text()}</FadeOut>
+      {/* Ferret mod: ping / packet loss */}
+      {!props.pip && <ConnectionQualityBadge />}
     </Status>
   );
 }

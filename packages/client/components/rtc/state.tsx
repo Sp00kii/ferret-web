@@ -15,6 +15,7 @@ import {
 } from "solid-livekit-components";
 
 import {
+  DisconnectReason,
   LocalTrackPublication,
   Room,
   ScreenShareCaptureOptions,
@@ -37,6 +38,7 @@ import {
 import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callCard/VoiceCallCard";
 
 import { Device, useDevice } from "@revolt/common";
+import { followPreferredDevices } from "@revolt/ferret/voice/devices"; // Ferret mod
 import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 import { VoiceProcessor } from "./VoiceProcessor";
@@ -47,6 +49,18 @@ type State =
   | "CONNECTING"
   | "CONNECTED"
   | "RECONNECTING";
+
+// Ferret mod: disconnects that were on purpose, so we must not rejoin
+const INTENTIONAL_DISCONNECTS = new Set<DisconnectReason>([
+  DisconnectReason.CLIENT_INITIATED,
+  DisconnectReason.DUPLICATE_IDENTITY,
+  DisconnectReason.PARTICIPANT_REMOVED,
+  DisconnectReason.ROOM_DELETED,
+  DisconnectReason.ROOM_CLOSED,
+  DisconnectReason.USER_REJECTED,
+  DisconnectReason.USER_UNAVAILABLE,
+]);
+const MAX_REJOIN_ATTEMPTS = 5;
 
 export type VoiceLayout = "fullscreen" | "expanded" | "collapsed" | undefined;
 
@@ -98,6 +112,10 @@ class Voice {
   private limits;
   private screenShareTracks: Set<string>;
   private voiceProcessor?: VoiceProcessor;
+
+  // Ferret mod: auto-rejoin state
+  #rejoinAttempts = 0;
+  #rejoinTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor(
     voiceSettings: VoiceSettings,
@@ -251,6 +269,7 @@ class Voice {
 
     room.addListener("connected", () => {
       this.#setState("CONNECTED");
+      this.#rejoinAttempts = 0; // Ferret mod
       if (this.speakingPermission)
         room.localParticipant
           .setMicrophoneEnabled(this.#settings.micOn)
@@ -268,7 +287,18 @@ class Voice {
       this.sound.playSound("userJoinVoice");
     });
 
-    room.addListener("disconnected", () => this.#setState("DISCONNECTED"));
+    // Ferret mod: show livekit's own recovery, rejoin after hard drops and
+    // follow the preferred mic/output across unplug/replug
+    room.addListener("disconnected", (reason) => {
+      this.#setState("DISCONNECTED");
+      this.#rejoinAfterDrop(channel, reason);
+    });
+    room.addListener("reconnecting", () => this.#setState("RECONNECTING"));
+    room.addListener("signalReconnecting", () =>
+      this.#setState("RECONNECTING"),
+    );
+    room.addListener("reconnected", () => this.#setState("CONNECTED"));
+    followPreferredDevices(room, this.#settings);
 
     room.addListener("localTrackPublished", (pub) => {
       if (pub.audioTrack && pub.audioTrack.source === Track.Source.Microphone) {
@@ -328,7 +358,44 @@ class Voice {
     });
   }
 
+  // Ferret mod
+  /**
+   * Rejoin the same channel (with a fresh token) after a drop we didn't ask
+   * for, backing off 1s, 2s, 4s... up to 5 attempts.
+   */
+  #rejoinAfterDrop(channel: Channel, reason?: DisconnectReason) {
+    if (reason !== undefined && INTENTIONAL_DISCONNECTS.has(reason)) return;
+    if (this.#rejoinTimer) return;
+    if (this.#rejoinAttempts >= MAX_REJOIN_ATTEMPTS) {
+      this.#rejoinAttempts = 0;
+      if (this.channel()?.id === channel.id) this.#setState("DISCONNECTED");
+      return;
+    }
+
+    const delay = Math.min(1000 * 2 ** this.#rejoinAttempts, 10_000);
+    this.#rejoinAttempts++;
+    this.#setState("RECONNECTING");
+
+    this.#rejoinTimer = setTimeout(() => {
+      this.#rejoinTimer = undefined;
+      // the user left or switched channels meanwhile
+      if (this.channel()?.id !== channel.id) return;
+      if (this.state() !== "RECONNECTING") return;
+
+      const attempt = this.connect(channel);
+      this.#setState("RECONNECTING");
+      attempt.catch(() => this.#rejoinAfterDrop(channel));
+    }, delay);
+  }
+
   disconnect() {
+    // Ferret mod: a manual disconnect cancels any pending auto-rejoin
+    if (this.#rejoinTimer) {
+      const pending = this.#rejoinTimer;
+      this.#rejoinTimer = undefined;
+      clearTimeout(pending);
+    }
+
     this.device.releaseWakeLock();
     try {
       const room = this.room();

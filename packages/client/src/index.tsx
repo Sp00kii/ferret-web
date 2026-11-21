@@ -23,6 +23,7 @@ import FlowReset from "@revolt/auth/src/flows/FlowReset";
 import FlowVerify from "@revolt/auth/src/flows/FlowVerify";
 import { ClientContext, SoundContext, useClient } from "@revolt/client";
 import { DeviceContext } from "@revolt/common";
+import { IncomingCalls } from "@revolt/ferret"; // Ferret mod
 import { I18nProvider } from "@revolt/i18n";
 import { InstanceContext } from "@revolt/instance";
 import { KeybindContext } from "@revolt/keybinds";
@@ -130,6 +131,8 @@ function MountContext(props: { children?: JSX.Element }) {
                   <ModalRenderer />
                   <FloatingManager />
                   <AndroidNag />
+                  {/* Ferret mod: ringtone + incoming call card */}
+                  <IncomingCalls />
                 </QueryClientProvider>
               </VoiceContext>
             </SoundContext>

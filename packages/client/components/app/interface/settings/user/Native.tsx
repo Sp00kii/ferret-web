@@ -170,7 +170,8 @@ export default function Native() {
             </>
           }
         >
-          <Trans>Stoat for Desktop</Trans>
+          {/* Ferret mod */}
+          Ferret
         </CategoryButton>
       </CategoryButton.Group>
     </Column>

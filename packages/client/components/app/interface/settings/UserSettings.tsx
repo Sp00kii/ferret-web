@@ -5,6 +5,7 @@ import { Server } from "stoat.js";
 import { css } from "styled-system/css";
 
 import { useClient, useClientLifecycle } from "@revolt/client";
+import { FerretSettings } from "@revolt/ferret/FerretSettings"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 import { useUser } from "@revolt/markdown/users";
 import { useModals } from "@revolt/modal";
@@ -80,6 +81,8 @@ const Config: SettingsConfiguration<{ server: Server }> = {
         return <EditSubscription />;
       case "native":
         return <Native />;
+      case "ferret": // Ferret mod
+        return <FerretSettings />;
       case "voice":
         return <VoiceSettings />;
       case "notifications":
@@ -118,9 +121,15 @@ const Config: SettingsConfiguration<{ server: Server }> = {
             <span class={css({ userSelect: "all" })}>{pkg.version}</span>
           </Text>
           <Show when={window.native}>
-            <Text class="label">
-              Stoat for Desktop {window.native.versions.desktop()}
-            </Text>
+            {/* Ferret mod: name + unofficial notice */}
+            <Text class="label">Ferret {window.native.versions.desktop()}</Text>
+            <Show when={window.ferret}>
+              <Text class="label">
+                <span class={css({ fontSize: "0.8em", opacity: "0.7" })}>
+                  {window.ferret!.unofficialNotice}
+                </span>
+              </Text>
+            </Show>
             <Text class="label">
               <span
                 class={css({
@@ -293,6 +302,13 @@ const Config: SettingsConfiguration<{ server: Server }> = {
               icon: <Symbol size={20}>desktop_windows</Symbol>,
               title: <Trans>Desktop</Trans>,
             },
+            // Ferret mod
+            {
+              id: "ferret",
+              hidden: !window.ferret,
+              icon: <Symbol size={20}>pets</Symbol>,
+              title: "Ferret",
+            },
             // {
             //   id: "experiments",
             //   icon: <Symbol size={20}>science</Symbol>,
@@ -312,7 +328,8 @@ const Config: SettingsConfiguration<{ server: Server }> = {
               title: <Trans>What's New</Trans>,
             },
             {
-              href: "https://github.com/stoatchat",
+              // Ferret mod: AGPL, link the source of the build being run
+              href: window.ferret?.repository ?? "https://github.com/stoatchat",
               icon: <Symbol size={20}>memory</Symbol>,
               title: <Trans>Source Code</Trans>,
             },
