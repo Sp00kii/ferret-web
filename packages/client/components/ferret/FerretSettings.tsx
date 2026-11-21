@@ -20,6 +20,7 @@ import type {
   FerretSettings as FerretSettingsType,
   UpdateCheckResult,
 } from "./bridge";
+import { FERRET_DONATE_URL } from "./links";
 import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
   applyFerretSettings,
@@ -373,6 +374,13 @@ function UpdatesSection() {
         onClick={() => window.open(window.ferret!.repository, "_blank")}
       >
         Ferret on GitHub
+      </CategoryButton>
+      <CategoryButton
+        icon={<Symbol>favorite</Symbol>}
+        description="Support Ferret's development on Ko-fi - thank you!"
+        onClick={() => window.open(FERRET_DONATE_URL, "_blank")}
+      >
+        Donate to Ferret
       </CategoryButton>
     </Section>
   );

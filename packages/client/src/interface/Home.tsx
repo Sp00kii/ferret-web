@@ -6,7 +6,9 @@ import { css, cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
 import { IS_DEV, useClient } from "@revolt/client";
-import { FerretWordmark } from "@revolt/ferret/Branding"; // Ferret mod
+// Ferret mod
+import { FerretWordmark } from "@revolt/ferret/Branding";
+import { FERRET_DONATE_URL } from "@revolt/ferret/links";
 import { useInstance } from "@revolt/instance";
 import { useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
@@ -189,6 +191,17 @@ export function HomePage() {
             >
               <Trans>Donate to Stoat</Trans>
             </CategoryButton>
+            {/* Ferret mod */}
+            <Show when={window.ferret}>
+              <CategoryButton
+                variant="tertiary"
+                onClick={() => window.open(FERRET_DONATE_URL)}
+                description="Support Ferret's development - thank you!"
+                icon={<Symbol fill>favorite</Symbol>}
+              >
+                Donate to Ferret
+              </CategoryButton>
+            </Show>
           </SeparatedColumn>
           <SeparatedColumn>
             <Show when={instance.isStoat}>

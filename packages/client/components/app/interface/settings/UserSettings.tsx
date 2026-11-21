@@ -5,7 +5,9 @@ import { Server } from "stoat.js";
 import { css } from "styled-system/css";
 
 import { useClient, useClientLifecycle } from "@revolt/client";
-import { FerretSettings } from "@revolt/ferret/FerretSettings"; // Ferret mod
+// Ferret mod
+import { FerretSettings } from "@revolt/ferret/FerretSettings";
+import { FERRET_DONATE_URL } from "@revolt/ferret/links";
 import { useInstance } from "@revolt/instance";
 import { useUser } from "@revolt/markdown/users";
 import { useModals } from "@revolt/modal";
@@ -341,7 +343,15 @@ const Config: SettingsConfiguration<{ server: Server }> = {
             {
               href: "https://ko-fi.com/stoatchat",
               icon: <Symbol size={20}>coffee</Symbol>,
-              title: <Trans>Donate</Trans>,
+              // Ferret mod: say whose project, next to Donate to Ferret
+              title: window.ferret ? "Donate to Stoat" : <Trans>Donate</Trans>,
+            },
+            // Ferret mod
+            {
+              href: FERRET_DONATE_URL,
+              hidden: !window.ferret,
+              icon: <Symbol size={20}>favorite</Symbol>,
+              title: "Donate to Ferret",
             },
             {
               id: "logout",
