@@ -27,6 +27,7 @@ import {
   updateFerretSettings,
   useFerretSettings,
 } from "./settings";
+import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
 import { MicTest } from "./voice/MicTest";
 
 /**
@@ -103,6 +104,8 @@ export function FerretSettings() {
           </Section>
 
           <WatchedChannels watched={config().watchedVoiceChannels} />
+
+          <SoundsSection settings={config()} />
 
           <Section title="Voice">
             <VoiceInputOptions />
@@ -249,6 +252,92 @@ function RingtonePicker(props: { ringtone: FerretSettingsType["ringtone"] }) {
         <Text class="label">{error()}</Text>
       </Show>
     </Column>
+  );
+}
+
+let soundPreview: HTMLAudioElement | undefined;
+
+function previewSound(src: string) {
+  soundPreview?.pause();
+  soundPreview = new Audio(src);
+  void soundPreview.play().catch(() => {});
+}
+
+function SoundsSection(props: { settings: FerretSettingsType }) {
+  const [error, setError] = createSignal<string>();
+  const latestSettings = useFerretSettings();
+
+  const options = (slot: string) => {
+    const pick = props.settings.sounds[slot];
+    const entries: Record<string, { title: string }> = {
+      ferret: { title: "Ferret (default)" },
+    };
+    for (const sound of SOUND_LIBRARY)
+      entries[sound.id] = { title: sound.name };
+    entries.custom = {
+      title: pick?.customFileName
+        ? `Your file: ${pick.customFileName}`
+        : "Your own file…",
+    };
+    return entries;
+  };
+
+  const select = async (
+    slot: (typeof SOUND_SLOTS)[number]["slot"],
+    id: string,
+  ) => {
+    setError(undefined);
+    try {
+      if (id === "custom" && !props.settings.sounds[slot]?.customFileName) {
+        // a cancelled file picker leaves the previous choice selected
+        applyFerretSettings(await window.ferret!.pickSound(slot));
+      } else {
+        await updateFerretSettings({ sounds: { [slot]: { choice: id } } });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+      return;
+    }
+
+    const latest = latestSettings();
+    if ((latest?.sounds[slot]?.choice ?? "ferret") === id) {
+      previewSound(soundSource(slot, latest));
+    }
+  };
+
+  return (
+    <Section title="Sounds">
+      <Text class="label">
+        Pick the sound for each event, or use your own file. Turning sounds on
+        or off is in Settings → Notifications.
+      </Text>
+      <CategoryButton.Group>
+        <For each={SOUND_SLOTS}>
+          {(entry) => (
+            <CategoryButton.Select
+              icon={<Symbol>volume_up</Symbol>}
+              title={entry.label}
+              value={props.settings.sounds[entry.slot]?.choice ?? "ferret"}
+              options={options(entry.slot)}
+              onUpdate={(id) => void select(entry.slot, id)}
+            />
+          )}
+        </For>
+      </CategoryButton.Group>
+      <Buttons>
+        <Button
+          variant="tonal"
+          onPress={async () =>
+            applyFerretSettings(await window.ferret!.resetSounds())
+          }
+        >
+          <Symbol>restart_alt</Symbol> Reset all to Ferret
+        </Button>
+      </Buttons>
+      <Show when={error()}>
+        <Text class="label">{error()}</Text>
+      </Show>
+    </Section>
   );
 }
 

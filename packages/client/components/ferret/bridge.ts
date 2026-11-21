@@ -18,6 +18,15 @@ export type FerretSettings = {
   showConnectionQuality: boolean;
   /** Ferret's navy/copper look; off = stock Stoat theming */
   ferretStyle: boolean;
+  /** Per-sound choices; missing slots use Ferret's own sound */
+  sounds: Partial<Record<string, FerretSoundChoice>>;
+};
+
+export type FerretSoundChoice = {
+  /** "ferret", a soundLibrary.ts id, or "custom" */
+  choice: string;
+  customFile: string | null;
+  customFileName: string | null;
 };
 
 export type FerretSettingsPatch = {
@@ -27,6 +36,7 @@ export type FerretSettingsPatch = {
   watchedVoiceChannels?: string[];
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
+  sounds?: Partial<Record<string, { choice: string }>>;
 };
 
 export type UpdateCheckResult =
@@ -46,6 +56,10 @@ export interface FerretBridge {
 
   pickRingtone(): Promise<FerretSettings>;
   clearRingtone(): Promise<FerretSettings>;
+
+  pickSound(slot: string): Promise<FerretSettings>;
+  clearSound(slot: string): Promise<FerretSettings>;
+  resetSounds(): Promise<FerretSettings>;
 
   showIncomingCall(call: {
     title: string;

@@ -1,6 +1,6 @@
 import { createContext, JSXElement, useContext } from "solid-js";
 
-import { FERRET_SOUNDS } from "@revolt/ferret/sounds"; // Ferret mod
+import { currentSoundSource } from "@revolt/ferret/soundLibrary"; // Ferret mod
 import { Sounds, TypeSounds, useState } from "@revolt/state";
 import deafenSound from "../../public/assets/sounds/deafen.ogg";
 import messageSound from "../../public/assets/sounds/message_sound.ogg";
@@ -135,9 +135,9 @@ export class SoundController {
         break;
       }
     }
-    // Ferret mod: Ferret's sound pack (the open-source fallback sounds are
-    // silent placeholders, and a click for messages)
-    if (window.ferret) this.node = new Audio(FERRET_SOUNDS[sound]);
+    // Ferret mod: Ferret's sounds, or whatever the user picked per sound (the
+    // open-source fallback sounds are silent placeholders and a click)
+    if (window.ferret) this.node = new Audio(currentSoundSource(sound));
     this.lastPlayedSound = sound;
     this.node.play();
     return true;
