@@ -1,6 +1,5 @@
-import classicRingtone from "../../public/assets/sounds/ringtone_incoming.ogg";
-
 import type { FerretSettings } from "./bridge";
+import { FERRET_SOUNDS } from "./sounds";
 
 const builtIn = (file: string) =>
   `${import.meta.env.BASE_URL}ferret/ringtones/${file}`;
@@ -24,11 +23,12 @@ export const RINGTONES = [
   },
   { id: "my-phone", name: "My Phone", src: builtIn("my-phone.mp3") },
   { id: "ringtone-231", name: "231", src: builtIn("ringtone-231.mp3") },
-  { id: "classic", name: "Classic (Stoat)", src: classicRingtone },
+  // id kept as "classic" so existing settings keep working
+  { id: "classic", name: "Ferret Chime", src: FERRET_SOUNDS.ringtoneIncoming },
 ];
 
 /** Played if the chosen sound can't be loaded */
-export const FALLBACK_RINGTONE = classicRingtone;
+export const FALLBACK_RINGTONE = FERRET_SOUNDS.ringtoneIncoming;
 
 export function ringtoneSource(ringtone: FerretSettings["ringtone"]) {
   if (ringtone.preset === "custom" && ringtone.customFileName) {
