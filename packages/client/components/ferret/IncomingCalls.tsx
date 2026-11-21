@@ -9,8 +9,7 @@ import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import { Avatar, Button, Symbol, Text } from "@revolt/ui";
 
-import defaultRingtone from "../../public/assets/sounds/ringtone_incoming.ogg";
-
+import { FALLBACK_RINGTONE, ringtoneSource } from "./ringtones";
 import { useFerretSettings } from "./settings";
 
 const RING_TIMEOUT_MS = 30_000;
@@ -79,26 +78,19 @@ export function IncomingCalls() {
 
   function playRingtone() {
     const config = settings()!;
-    const custom = config.ringtone.customFileName;
-    const element = new Audio(
-      custom
-        ? `/__ferret/ringtone?v=${encodeURIComponent(custom)}`
-        : defaultRingtone,
-    );
+    const element = new Audio(ringtoneSource(config.ringtone));
     element.loop = true;
     element.volume = config.ringtone.volume / 100;
 
-    // fall back to the built-in sound if the custom file won't play
-    if (custom) {
-      element.addEventListener(
-        "error",
-        () => {
-          element.src = defaultRingtone;
-          void element.play().catch(() => {});
-        },
-        { once: true },
-      );
-    }
+    // fall back to the classic sound if the chosen file won't play
+    element.addEventListener(
+      "error",
+      () => {
+        element.src = FALLBACK_RINGTONE;
+        void element.play().catch(() => {});
+      },
+      { once: true },
+    );
 
     const sink = state.voice.preferredAudioOutputDevice;
     if (sink && "setSinkId" in element) {

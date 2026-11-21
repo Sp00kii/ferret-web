@@ -6,6 +6,8 @@
 export type FerretSettings = {
   ringtone: {
     enabled: boolean;
+    /** Built-in sound id from ringtones.ts, or "custom" for the user's file */
+    preset: string;
     /** 0-100 */
     volume: number;
     customFile: string | null;

@@ -15,9 +15,11 @@ import {
   Text,
 } from "@revolt/ui";
 
-import defaultRingtone from "../../public/assets/sounds/ringtone_incoming.ogg";
-
-import type { UpdateCheckResult } from "./bridge";
+import type {
+  FerretSettings as FerretSettingsType,
+  UpdateCheckResult,
+} from "./bridge";
+import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
   applyFerretSettings,
   updateFerretSettings,
@@ -81,10 +83,7 @@ export function FerretSettings() {
               labelFormatter={(value) => `${value}%`}
             />
 
-            <RingtonePicker
-              fileName={config().ringtone.customFileName}
-              volume={config().ringtone.volume}
-            />
+            <RingtonePicker ringtone={config().ringtone} />
           </Section>
 
           <WatchedChannels watched={config().watchedVoiceChannels} />
@@ -144,7 +143,7 @@ function Toggle(props: {
   );
 }
 
-function RingtonePicker(props: { fileName: string | null; volume: number }) {
+function RingtonePicker(props: { ringtone: FerretSettingsType["ringtone"] }) {
   const [error, setError] = createSignal<string>();
   let preview: HTMLAudioElement | undefined;
   let previewTimer: ReturnType<typeof setTimeout> | undefined;
@@ -156,52 +155,79 @@ function RingtonePicker(props: { fileName: string | null; volume: number }) {
   };
   onCleanup(stopPreview);
 
-  const playPreview = () => {
+  const playPreview = (ringtone = props.ringtone) => {
     stopPreview();
+    setError(undefined);
+    const src = ringtoneSource(ringtone);
+    // custom files keep the same URL, so bust the cache after a re-pick
     preview = new Audio(
-      props.fileName
-        ? `/__ferret/ringtone?v=${encodeURIComponent(props.fileName)}&t=${Date.now()}`
-        : defaultRingtone,
+      ringtone.preset === "custom" ? `${src}&t=${Date.now()}` : src,
     );
-    preview.volume = props.volume / 100;
+    preview.volume = ringtone.volume / 100;
     void preview.play().catch(() => setError("Couldn't play this sound file."));
-    previewTimer = setTimeout(stopPreview, 4000);
+    previewTimer = setTimeout(stopPreview, 5000);
   };
 
   const pick = async () => {
     setError(undefined);
     try {
-      applyFerretSettings(await window.ferret!.pickRingtone());
+      const next = await window.ferret!.pickRingtone();
+      applyFerretSettings(next);
+      if (next?.ringtone.preset === "custom") playPreview(next.ringtone);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
   };
 
+  const options = createMemo(() => {
+    const entries: Record<string, { title: string }> = {};
+    for (const tone of RINGTONES) entries[tone.id] = { title: tone.name };
+    entries.custom = {
+      title: props.ringtone.customFileName
+        ? `Your file: ${props.ringtone.customFileName}`
+        : "Your own file…",
+    };
+    return entries;
+  });
+
+  const select = async (id: string) => {
+    if (id === "custom" && !props.ringtone.customFileName) return pick();
+    await updateFerretSettings({ ringtone: { preset: id } });
+    playPreview({ ...props.ringtone, preset: id });
+  };
+
   return (
     <Column gap="sm">
-      <CategoryButton
-        icon={<Symbol>music_note</Symbol>}
-        description={props.fileName ?? "Built-in ringtone"}
-      >
-        Ringtone sound
-      </CategoryButton>
+      <CategoryButton.Group>
+        <CategoryButton.Select
+          icon={<Symbol>music_note</Symbol>}
+          title="Ringtone"
+          value={
+            props.ringtone.preset === "custom" && !props.ringtone.customFileName
+              ? RINGTONES[0].id
+              : props.ringtone.preset
+          }
+          options={options()}
+          onUpdate={(id) => void select(id)}
+        />
+      </CategoryButton.Group>
       <Buttons>
-        <Button variant="filled" onPress={pick}>
-          Choose sound file…
+        <Button variant="tonal" onPress={() => playPreview()}>
+          <Symbol>play_arrow</Symbol> Preview
         </Button>
-        <Show when={props.fileName}>
+        <Button variant="tonal" onPress={pick}>
+          <Symbol>upload_file</Symbol> Use my own file…
+        </Button>
+        <Show when={props.ringtone.customFileName}>
           <Button
             variant="tonal"
             onPress={async () =>
               applyFerretSettings(await window.ferret!.clearRingtone())
             }
           >
-            Use built-in sound
+            Remove my file
           </Button>
         </Show>
-        <Button variant="tonal" onPress={playPreview}>
-          <Symbol>play_arrow</Symbol> Preview
-        </Button>
       </Buttons>
       <Show when={error()}>
         <Text class="label">{error()}</Text>
