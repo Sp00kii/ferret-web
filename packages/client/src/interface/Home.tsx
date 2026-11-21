@@ -6,6 +6,7 @@ import { css, cva } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
 import { IS_DEV, useClient } from "@revolt/client";
+import { FerretWordmark } from "@revolt/ferret/Branding"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 import { useModals } from "@revolt/modal";
 import { useNavigate } from "@revolt/routing";
@@ -107,12 +108,20 @@ export function HomePage() {
       </Header>
       <div use:scrollable={{ class: content() }}>
         <Column>
-          <Wordmark
-            class={css({
-              width: "160px",
-              fill: "var(--md-sys-color-on-surface)",
-            })}
-          />
+          {/* Ferret mod: Ferret logo instead of the placeholder wordmark */}
+          <Show
+            when={window.ferret}
+            fallback={
+              <Wordmark
+                class={css({
+                  width: "160px",
+                  fill: "var(--md-sys-color-on-surface)",
+                })}
+              />
+            }
+          >
+            <FerretWordmark size={72} />
+          </Show>
         </Column>
         <Buttons>
           <SeparatedColumn>

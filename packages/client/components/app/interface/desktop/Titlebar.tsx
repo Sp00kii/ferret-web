@@ -6,6 +6,7 @@ import { styled } from "styled-system/jsx";
 
 import { useClientLifecycle } from "@revolt/client";
 import { State, TransitionType } from "@revolt/client/Controller";
+import { FerretWordmark } from "@revolt/ferret/Branding"; // Ferret mod
 import { Button, Ripple, Symbol, typography } from "@revolt/ui";
 
 import Wordmark from "../../../../public/assets/web/wordmark.svg?component-solid";
@@ -55,12 +56,20 @@ export function Titlebar() {
                 "-webkit-app-region": "drag",
               }}
             >
-              <Wordmark
-                class={css({
-                  height: "18px",
-                  marginBlockStart: "1px",
-                })}
-              />{" "}
+              {/* Ferret mod: Ferret logo instead of the placeholder wordmark */}
+              <Show
+                when={window.ferret}
+                fallback={
+                  <Wordmark
+                    class={css({
+                      height: "18px",
+                      marginBlockStart: "1px",
+                    })}
+                  />
+                }
+              >
+                <FerretWordmark />
+              </Show>{" "}
               <Show when={import.meta.env.DEV}>
                 <Symbol size={16}>build</Symbol>
               </Show>

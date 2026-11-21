@@ -15,6 +15,7 @@ import {
   Text,
 } from "@revolt/ui";
 
+import { FERRET_LOGO } from "./Branding";
 import type {
   FerretSettings as FerretSettingsType,
   UpdateCheckResult,
@@ -43,9 +44,23 @@ export function FerretSettings() {
       {(config) => (
         <Column gap="lg">
           <Notice>
-            <Symbol>info</Symbol>
+            <img src={FERRET_LOGO} alt="" width={40} height={40} />
             <span>{window.ferret!.unofficialNotice}</span>
           </Notice>
+
+          <Section title="Appearance">
+            <CategoryButton.Group>
+              <Toggle
+                icon="palette"
+                checked={config().ferretStyle}
+                onToggle={(ferretStyle) =>
+                  updateFerretSettings({ ferretStyle })
+                }
+                title="Ferret style"
+                description="Ferret's navy and copper look. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
+              />
+            </CategoryButton.Group>
+          </Section>
 
           <Section title="Incoming calls">
             <CategoryButton.Group>
@@ -372,6 +387,10 @@ const Notice = styled("div", {
     borderRadius: "var(--borderRadius-lg)",
     background: "var(--md-sys-color-secondary-container)",
     color: "var(--md-sys-color-on-secondary-container)",
+    "& img": {
+      flexShrink: 0,
+      borderRadius: "var(--borderRadius-sm)",
+    },
   },
 });
 

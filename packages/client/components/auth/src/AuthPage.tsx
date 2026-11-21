@@ -21,14 +21,19 @@ import {
 } from "@revolt/app/menus/ContextMenu";
 import { useClientLifecycle } from "@revolt/client";
 import { State } from "@revolt/client/Controller";
+import { FerretWordmark } from "@revolt/ferret/Branding";
 import { useModals } from "@revolt/modal";
 import { A, useLocation } from "@revolt/routing";
 import { useState } from "@revolt/state";
 import { IconButton, Symbol } from "@revolt/ui";
 
-import Wordmark from "../../../public/assets/web/wordmark.svg?component-solid";
+import StoatWordmark from "../../../public/assets/web/wordmark.svg?component-solid";
 import { AppUpsell } from "./AppUpsell";
 import { BubbleMood, BubbleProvider, FlowBase, FlowBubble } from "./flows/Flow";
+
+// Ferret mod: Ferret logo instead of the placeholder wordmark
+const Wordmark = () =>
+  window.ferret ? <FerretWordmark size={32} /> : <StoatWordmark />;
 
 import Bluesky from "./flows/bluesky.svg?component-solid";
 import GitHub from "./flows/github.svg?component-solid";

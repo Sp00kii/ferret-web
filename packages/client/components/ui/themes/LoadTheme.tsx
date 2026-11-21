@@ -2,6 +2,9 @@ import { createEffect, createMemo } from "solid-js";
 
 import { useClientLifecycle } from "@revolt/client";
 import { State } from "@revolt/client/Controller";
+// Ferret mod
+import { useFerretSettings } from "@revolt/ferret/settings";
+import { ferretThemeVariables } from "@revolt/ferret/theme/ferretTheme";
 import { useState } from "@revolt/state";
 
 import {
@@ -30,6 +33,15 @@ export function LoadTheme() {
     ].includes(lifecycle.state()),
   );
 
+  // Ferret mod: Ferret style is on unless switched off in Ferret settings
+  const ferretSettings = useFerretSettings();
+  const ferretStyle = () =>
+    !!window.ferret && (ferretSettings()?.ferretStyle ?? true);
+
+  createEffect(() =>
+    document.body.toggleAttribute("data-ferret-style", ferretStyle()),
+  );
+
   const getCssProps = createMemo(() => {
     const activeTheme = state.theme.activeTheme;
 
@@ -50,8 +62,13 @@ export function LoadTheme() {
       ...createMaterialColourVariables(activeTheme, "--md-sys-color-"),
       // mount --mdui-color triplet variables
       ...createMduiColourTriplets(activeTheme, "--mdui-color-"),
+      // Ferret mod: Ferret palette + radii on top of the stock theme
+      ...(ferretStyle() ? ferretThemeVariables(activeTheme) : {}),
     };
   });
+
+  // Ferret mod: variables set last time, so ones that disappear get removed
+  let appliedProps = new Set<string>();
 
   //Load fonts & update CSS props on body
   createEffect(() => {
@@ -59,6 +76,10 @@ export function LoadTheme() {
     MONOSPACE_FONTS[state.theme.monospaceFont].load();
 
     const cssProps = getCssProps();
+    for (const key of appliedProps)
+      if (!(key in cssProps)) document.body.style.removeProperty(key);
+    appliedProps = new Set(Object.keys(cssProps));
+
     for (const [key, value] of Object.entries(cssProps))
       document.body.style.setProperty(key, value);
   });

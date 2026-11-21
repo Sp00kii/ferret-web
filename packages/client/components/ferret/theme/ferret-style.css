@@ -1,0 +1,26 @@
+/*
+ * Ferret style: small global touches on top of the Ferret colour tokens.
+ * Everything is scoped to body[data-ferret-style], which is only set while
+ * the "Ferret style" switch is on, so the stock Stoat look is untouched.
+ */
+
+body[data-ferret-style] {
+  scrollbar-color: #343d55 transparent;
+}
+
+body[data-ferret-style] ::selection {
+  background: rgb(240 120 53 / 0.35);
+}
+
+body[data-ferret-style] :focus-visible {
+  outline-color: #f07835;
+}
+
+body[data-ferret-style] ::-webkit-scrollbar-thumb {
+  background-color: #343d55;
+  border-radius: 8px;
+}
+
+body[data-ferret-style] ::-webkit-scrollbar-thumb:hover {
+  background-color: #4a5470;
+}

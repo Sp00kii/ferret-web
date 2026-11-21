@@ -16,6 +16,8 @@ export type FerretSettings = {
   };
   watchedVoiceChannels: string[];
   showConnectionQuality: boolean;
+  /** Ferret's navy/copper look; off = stock Stoat theming */
+  ferretStyle: boolean;
 };
 
 export type FerretSettingsPatch = {
@@ -24,6 +26,7 @@ export type FerretSettingsPatch = {
   >;
   watchedVoiceChannels?: string[];
   showConnectionQuality?: boolean;
+  ferretStyle?: boolean;
 };
 
 export type UpdateCheckResult =

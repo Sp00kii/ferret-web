@@ -419,8 +419,16 @@ CategoryButton.Select = <T extends string>(props: SelectProps<T>) => {
   //Toggle the opened state and scroll to the beginning of contents
   const toggleOpened = () => {
     const open = !opened();
-    if (open && column && column.scrollHeight > MAX_HEIGHT)
-      column.children[opts().indexOf(value())]?.scrollIntoView();
+    // Ferret mod: scroll only the option list to the selected option.
+    // scrollIntoView() also scrolled the settings page, pushing the opened
+    // dropdown off the top of the screen.
+    if (open && column && column.scrollHeight > MAX_HEIGHT) {
+      const selected = column.children[opts().indexOf(value())];
+      if (selected)
+        column.scrollTop +=
+          selected.getBoundingClientRect().top -
+          column.getBoundingClientRect().top;
+    }
     setOpened(open);
   };
 
