@@ -120,6 +120,38 @@ class Lifecycle {
 
     this.client = null!;
     this.reset();
+
+    // Ferret mod: nothing used to fire DeviceOnline, so a drop while offline
+    // (sleep, Wi-Fi blip) left the app in Offline until a manual reload.
+    window.addEventListener("online", () => this.resync("network online"));
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) this.resync("window visible");
+    });
+    window.ferret?.onResync((reason) => this.resync(reason));
+  }
+
+  // Ferret mod
+  /**
+   * Resync now instead of waiting: verify a live socket right away, or skip
+   * the remaining back-off / leave the Offline state.
+   */
+  resync(reason: string) {
+    if (!navigator.onLine) return;
+
+    switch (this.state()) {
+      case State.Connected:
+        this.client.events.checkAlive();
+        break;
+      case State.Offline:
+        console.info("[ferret] reconnecting:", reason);
+        this.transition({ type: TransitionType.DeviceOnline });
+        break;
+      case State.Disconnected:
+        console.info("[ferret] skipping reconnect back-off:", reason);
+        this.#connectionFailures = 0;
+        this.transition({ type: TransitionType.Retry });
+        break;
+    }
   }
 
   private reset() {
@@ -197,8 +229,9 @@ class Lifecycle {
             type: TransitionType.DeviceOffline,
           });
         } else {
+          // Ferret mod: cap the back-off; uncapped it grew to hours after a long outage
           const retryIn =
-            (Math.pow(2, this.#connectionFailures) - 1) *
+            Math.min(Math.pow(2, this.#connectionFailures) - 1, 30) *
             (0.8 + Math.random() * 0.4);
 
           console.info(
@@ -543,6 +576,10 @@ export default class ClientController {
     } else {
       friendly_name = "Stoat for Web (Unknown Device)";
     }
+
+    // Ferret mod: label the session honestly in Settings > Sessions
+    if (window.ferret)
+      friendly_name = "Ferret (unofficial Stoat mod) on Windows";
 
     // Try to login with given credentials
     let session = await this.api.post("/auth/session/login", {
