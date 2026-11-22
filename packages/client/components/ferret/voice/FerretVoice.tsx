@@ -9,6 +9,7 @@ import { useFerretSettings } from "../settings";
 import { StopSoundsButton } from "../StopSoundsButton";
 
 import { setMicChainConfig, setPushToTalkHeld } from "./micChain";
+import { followShareAudio } from "./shareAudio";
 
 const MINI_UPDATE_MS = 400;
 
@@ -29,6 +30,7 @@ export function FerretVoice() {
   createEffect(() => setMicChainConfig(settings()?.voice));
 
   const unsubscribers = [
+    followShareAudio(() => voice.room()),
     bridge.onPushToTalk((held) => setPushToTalkHeld(held)),
     bridge.onHotkey((action) => {
       if (!voice.room()) return;

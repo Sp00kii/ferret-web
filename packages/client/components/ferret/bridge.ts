@@ -57,6 +57,8 @@ export type FerretPersonSounds = {
   soundboardVolume?: number;
 };
 
+export type FerretShareAudioMode = "none" | "all" | "app" | "exceptFerret";
+
 export type FerretLinkPreview = {
   url: string;
   siteName: string;
@@ -209,6 +211,18 @@ export interface FerretBridge {
 
   /** Ferret's own preview for a link, or null */
   linkPreview(url: string): Promise<FerretLinkPreview | null>;
+
+  /** Screen share sound captured by Ferret's helper (Windows 11) */
+  shareAudio: {
+    /** Sound choices this PC supports */
+    modes(): Promise<FerretShareAudioMode[] | null>;
+    /** Choice for the next screen share */
+    setMode(mode: FerretShareAudioMode): Promise<boolean>;
+    stop(): void;
+    onStart(callback: () => void): () => void;
+    onData(callback: (data: Uint8Array) => void): () => void;
+    onEnd(callback: () => void): () => void;
+  };
 
   /** Save / restore a .ferret-backup file (settings + own sound files) */
   exportSettings(): Promise<BackupResult | null>;

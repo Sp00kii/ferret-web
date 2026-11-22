@@ -7,6 +7,16 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.9",
+    items: [
+      {
+        icon: "🔊",
+        title: "Pick your screen share sound",
+        text: "Share only the app you're streaming, or everything except Ferret so friends don't hear themselves echo. Needs Windows 11; pick it when you start sharing.",
+      },
+    ],
+  },
+  {
     version: "1.0.8",
     items: [
       {

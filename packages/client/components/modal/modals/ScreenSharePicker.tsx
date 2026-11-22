@@ -5,7 +5,8 @@ import { useState } from "@revolt/state";
 import { ScreenShareQualityName } from "@revolt/state/stores/Voice";
 import { Avatar, Column, Dialog, DialogProps, Form2, Ripple } from "@revolt/ui";
 
-import { createMemo } from "solid-js";
+import type { FerretShareAudioMode } from "@revolt/ferret/bridge"; // Ferret mod
+import { Show, createEffect, createMemo, createResource } from "solid-js";
 import { styled } from "styled-system/jsx";
 import { Modals } from "../types";
 
@@ -23,11 +24,59 @@ export function ScreenSharePickerModal(
     idx: createFormControl([0], { required: true }),
   });
 
+  // Ferret mod: choose what sound the share sends ("only this app" and
+  // "everything except Ferret" need Windows 11 and Ferret's audio helper)
+  const [ferretModes] = createResource(
+    async () => (await window.ferret?.shareAudio.modes()) ?? undefined,
+  );
+  const ferretMode = createFormControl<string>("none");
+  createEffect(() => {
+    const modes = ferretModes();
+    if (!modes) return;
+    ferretMode.setValue(
+      !voice.screenShareAudio
+        ? "none"
+        : modes.includes("exceptFerret")
+          ? "exceptFerret"
+          : "all",
+    );
+  });
+  const selectedIsScreen = () =>
+    !!props.sources.find((source) => source.idx === group.controls.idx.value[0])
+      ?.isFullScreen;
+  // "only this app" needs a window, not a whole screen
+  createEffect(() => {
+    if (selectedIsScreen() && ferretMode.value === "app")
+      ferretMode.setValue("exceptFerret");
+  });
+  const ferretModeButtons = () =>
+    (
+      [
+        ["none", "No sound"],
+        ["all", "All sound"],
+        ["app", "Only this app"],
+        ["exceptFerret", "All except Ferret"],
+      ] as const
+    )
+      .filter(
+        ([mode]) =>
+          ferretModes()?.includes(mode) &&
+          !(mode === "app" && selectedIsScreen()),
+      )
+      .map(([value, children]) => ({ value, children }));
+
   async function onSubmit() {
+    let audio = group.controls.audio.value;
+    if (ferretModes()) {
+      audio = ferretMode.value !== "none";
+      await window.ferret!.shareAudio.setMode(
+        ferretMode.value as FerretShareAudioMode,
+      );
+    }
     props.callback(
       group.controls.idx.value[0],
       group.controls.qualityName.value,
-      group.controls.audio.value,
+      audio,
     );
     props.onClose();
   }
@@ -91,9 +140,25 @@ export function ScreenSharePickerModal(
               };
             })}
           />
-          <Form2.Checkbox control={group.controls.audio}>
-            <Trans>Share audio</Trans>
-          </Form2.Checkbox>
+          {/* Ferret mod: sound choices instead of on / off */}
+          <Show
+            when={ferretModes()}
+            fallback={
+              <Form2.Checkbox control={group.controls.audio}>
+                <Trans>Share audio</Trans>
+              </Form2.Checkbox>
+            }
+          >
+            <Form2.ButtonGroup
+              control={ferretMode}
+              buttonDefinitions={ferretModeButtons()}
+            />
+            <Show when={ferretMode.value === "all"}>
+              <small>
+                All sound includes the call, so viewers hear themselves.
+              </small>
+            </Show>
+          </Show>
         </Column>
       </form>
     </Dialog>
