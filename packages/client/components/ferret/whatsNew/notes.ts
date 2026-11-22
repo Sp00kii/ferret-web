@@ -7,6 +7,16 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.10",
+    items: [
+      {
+        icon: "🎭",
+        title: "Personas",
+        text: "Post with another name and picture for role-play, using Stoat's masquerade. Use the mask button in the message box (where the server allows it).",
+      },
+    ],
+  },
+  {
     version: "1.0.9",
     items: [
       {

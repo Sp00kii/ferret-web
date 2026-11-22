@@ -44,6 +44,10 @@ export type FerretSettings = {
   people: Record<string, FerretPersonSounds>;
   /** Private nicknames, keyed by user id; only you see them */
   nicknames: Record<string, string>;
+  /** Names / pictures to post as (masquerade) */
+  personas: FerretPersona[];
+  /** Persona picked per channel (channel id -> persona id) */
+  personaByChannel: Record<string, string>;
 };
 
 export type FerretPersonSounds = {
@@ -55,6 +59,15 @@ export type FerretPersonSounds = {
   muteSoundboard?: boolean;
   /** 0-100, volume of this person's clips (missing = 100) */
   soundboardVolume?: number;
+};
+
+export type FerretPersona = {
+  id: string;
+  name: string;
+  /** https picture link, or null for your own avatar */
+  avatar: string | null;
+  /** "#rrggbb", or null */
+  colour: string | null;
 };
 
 export type FerretShareAudioMode = "none" | "all" | "app" | "exceptFerret";
@@ -129,6 +142,10 @@ export type FerretSettingsPatch = {
   linkPreviews?: boolean;
   /** an empty string or null removes the nickname */
   nicknames?: Record<string, string | null>;
+  /** the whole list at once */
+  personas?: FerretPersona[];
+  /** null means post as yourself */
+  personaByChannel?: Record<string, string | null>;
   appIcon?: string;
   zoom?: number;
   pauseAnimations?: boolean | null;

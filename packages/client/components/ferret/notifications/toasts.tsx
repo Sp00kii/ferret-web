@@ -5,6 +5,7 @@ import type { Message } from "stoat.js";
 
 import { useClient } from "@revolt/client";
 
+import { masqueradeFor } from "../personas";
 import { useFerretSettings } from "../settings";
 import { chosenAccent } from "../theme/accent";
 import { popupColours } from "../theme/looks";
@@ -107,11 +108,13 @@ export function FerretToastActions() {
     }
 
     try {
+      const masquerade = masqueradeFor(channel);
       await channel.sendMessage({
         content: action.text,
         replies: action.messageId
           ? [{ id: action.messageId, mention: true }]
           : undefined,
+        ...(masquerade ? { masquerade } : {}),
       });
       bridge.toast.replyResult({ id: action.id, ok: true });
     } catch (error) {

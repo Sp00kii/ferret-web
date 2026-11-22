@@ -14,6 +14,8 @@ import { Channel } from "stoat.js";
 import { useClient } from "@revolt/client";
 import { debounce } from "@revolt/common";
 import { createIsTimedOut } from "@revolt/common/lib/createIsTimedOut";
+import { PersonaButton } from "@revolt/ferret/PersonaButton"; // Ferret mod
+import { masqueradeFor } from "@revolt/ferret/personas"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 import { createKeybind, Keybind, KeybindAction } from "@revolt/keybinds";
 import { useModals } from "@revolt/modal";
@@ -208,7 +210,11 @@ export function MessageComposition(props: Props) {
         });
         return state.draft.sendDraft(client(), props.channel);
       }
-      return props.channel.sendMessage(useContent);
+      // Ferret mod: GIFs etc. go out as the picked persona too
+      const masquerade = masqueradeFor(props.channel);
+      return props.channel.sendMessage(
+        masquerade ? { content: useContent, masquerade } : useContent,
+      );
     }
 
     state.draft.sendDraft(client(), props.channel);
@@ -375,16 +381,20 @@ export function MessageComposition(props: Props) {
         content={draft()?.content ?? ""}
         setContent={setContent}
         actionsStart={
-          <Show
-            when={props.channel.havePermission("UploadFiles")}
-            fallback={<MessageBox.InlineIcon size="short" />}
-          >
-            <MessageBox.InlineIcon>
-              <IconButton onPress={addFile}>
-                <Symbol>add</Symbol>
-              </IconButton>
-            </MessageBox.InlineIcon>
-          </Show>
+          <>
+            <Show
+              when={props.channel.havePermission("UploadFiles")}
+              fallback={<MessageBox.InlineIcon size="short" />}
+            >
+              <MessageBox.InlineIcon>
+                <IconButton onPress={addFile}>
+                  <Symbol>add</Symbol>
+                </IconButton>
+              </MessageBox.InlineIcon>
+            </Show>
+            {/* Ferret mod: post as a persona (masquerade), where allowed */}
+            <PersonaButton channel={props.channel} />
+          </>
         }
         actionsEnd={
           <MessageBox.ActionContainer column>

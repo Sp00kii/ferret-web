@@ -4,6 +4,7 @@ import { API, Channel, Client, Message } from "stoat.js";
 import { ulid } from "ulid";
 
 import { insecureUniqueId } from "@revolt/common";
+import { masqueradeFor } from "@revolt/ferret/personas"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 
 import { AbstractStore } from ".";
@@ -316,6 +317,10 @@ export class Draft extends AbstractStore<"draft", TypeDraft> {
       replies,
       attachments,
     };
+
+    // Ferret mod: post as the persona picked for this channel
+    const masquerade = masqueradeFor(channel);
+    if (masquerade) data.masquerade = masquerade;
 
     // Add any files if attached
     if (files?.length) {
