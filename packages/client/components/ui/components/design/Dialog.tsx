@@ -138,7 +138,8 @@ Dialog.Scrim = (
 
 const Scrim = styled("div", {
   base: {
-    top: 0,
+    // Ferret mod: below the desktop title bar, keeping its buttons usable
+    top: "var(--ferret-titlebar-height, 0px)",
     left: 0,
     right: 0,
     bottom: 0,

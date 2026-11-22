@@ -20,9 +20,9 @@ export const NOISES_ID = "noises";
 export const NOISES_LABEL = "Ferret noises (dooks)";
 
 /**
- * Ferret-noise pack: dooks, hisses and squeaks, one per event (e.g. a
- * double dook for messages, rising dooks when someone joins). Synthesised
- * for Ferret, no recordings.
+ * Ferret-noise pack: the Dook chirp in a different pattern for every event
+ * (e.g. a double dook for messages, rising dooks when someone joins).
+ * Synthesised for Ferret by scripts/make-sounds.mjs, no recordings.
  */
 export const FERRET_NOISES: Record<keyof TypeSounds, string> = {
   deafen,
@@ -39,4 +39,22 @@ export const FERRET_NOISES: Record<keyof TypeSounds, string> = {
   userJoinVoice,
   userLeaveVoice,
   userMoved,
+};
+
+/** What each sound in the pack is, shown in the sound pickers */
+export const FERRET_NOISE_NAMES: Record<keyof TypeSounds, string> = {
+  deafen: "two low chirps down",
+  message: "dook-dook",
+  mute: "low chirp",
+  ringtoneIncoming: "Dook Party",
+  ringtoneOutgoing: "calm dooks",
+  streamEnd: "winding down",
+  streamStart: "excited chatter",
+  streamViewerJoin: "tiny chirp up",
+  streamViewerLeave: "tiny chirp down",
+  undeafen: "two chirps up",
+  unmute: "springy chirp",
+  userJoinVoice: "dooks going up",
+  userLeaveVoice: "dooks going down",
+  userMoved: "dook... dook-dook",
 };

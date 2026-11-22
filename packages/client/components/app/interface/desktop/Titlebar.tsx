@@ -1,4 +1,4 @@
-import { createSignal, Match, Show, Switch } from "solid-js";
+import { createEffect, createSignal, Match, Show, Switch } from "solid-js";
 import { Motion, Presence } from "solid-motionone";
 
 import { css } from "styled-system/css";
@@ -30,6 +30,17 @@ export function Titlebar() {
     ].includes(lifecycle.state());
   }
 
+  // Ferret mod: tell full-window overlays (settings, dialogs) how tall the
+  // title bar is, so they start below it instead of hiding the window buttons
+  const shown = () =>
+    (isNative && window.desktopConfig?.get().customFrame) || isDisconnected();
+  createEffect(() =>
+    document.documentElement.style.setProperty(
+      "--ferret-titlebar-height",
+      shown() ? "29px" : "0px",
+    ),
+  );
+
   function maximise() {
     window.native.maximise();
     setIsMaximised((t) => !t);
@@ -37,12 +48,7 @@ export function Titlebar() {
 
   return (
     <Presence>
-      <Show
-        when={
-          (isNative && window.desktopConfig?.get().customFrame) ||
-          isDisconnected()
-        }
-      >
+      <Show when={shown()}>
         <Motion.div
           initial={{ height: 0 }}
           animate={{ height: "29px" }}

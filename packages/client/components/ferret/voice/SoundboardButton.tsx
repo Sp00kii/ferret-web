@@ -4,10 +4,14 @@ import { Portal } from "solid-js/web";
 import { styled } from "styled-system/jsx";
 
 import { useVoice } from "@revolt/rtc";
-import { IconButton } from "@revolt/ui/components/design";
+import { IconButton, Slider } from "@revolt/ui/components/design";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
-import { applyFerretSettings } from "../settings";
+import {
+  applyFerretSettings,
+  updateFerretSettings,
+  useFerretSettings,
+} from "../settings";
 
 import {
   SOUNDBOARD,
@@ -65,6 +69,8 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
   });
 
   const muted = () => !voice.microphone();
+  const settings = useFerretSettings();
+  const volume = () => settings()?.voice.soundboardVolume ?? 60;
   const [error, setError] = createSignal<string>();
 
   const addClip = async () => {
@@ -132,6 +138,21 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
                 Add sound
               </Clip>
             </Grid>
+            <VolumeRow>
+              <Symbol size={18}>volume_up</Symbol>
+              <Slider
+                min={0}
+                max={100}
+                step={5}
+                value={volume()}
+                onChange={(event) =>
+                  void updateFerretSettings({
+                    voice: { soundboardVolume: event.currentTarget.value },
+                  })
+                }
+                labelFormatter={(value) => `${value}%`}
+              />
+            </VolumeRow>
             <Show when={error()}>
               <ErrorText>{error()}</ErrorText>
             </Show>
@@ -210,6 +231,18 @@ const Clip = styled("button", {
       background: "var(--md-sys-color-secondary-container)",
     },
     "&:disabled": { opacity: 0.5, cursor: "default" },
+  },
+});
+
+/** Volume for everyone in the call (and you), same as in settings */
+const VolumeRow = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    paddingTop: "8px",
+    paddingInline: "4px",
+    "& mdui-slider": { flexGrow: 1 },
   },
 });
 

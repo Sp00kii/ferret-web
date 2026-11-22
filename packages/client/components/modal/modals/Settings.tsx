@@ -43,7 +43,8 @@ export function SettingsModal(
           position: "fixed",
           left: 0,
           right: 0,
-          top: 0,
+          // Ferret mod: below the desktop title bar, keeping its buttons usable
+          top: "var(--ferret-titlebar-height, 0px)",
           bottom: 0,
           "pointer-events": "none",
         }}

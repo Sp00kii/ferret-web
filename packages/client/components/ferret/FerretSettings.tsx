@@ -34,7 +34,7 @@ import {
 } from "./diagnostics/DiagnosticsSection";
 import { FERRET_DONATE_URL } from "./links";
 import { pauseAnimationsActive } from "./motion/FerretMotion";
-import { FERRET_NOISES, NOISES_ID, NOISES_LABEL } from "./noises";
+import { FERRET_NOISES, FERRET_NOISE_NAMES, NOISES_ID } from "./noises";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
@@ -475,11 +475,14 @@ function SoundsSection(props: { settings: FerretSettingsType }) {
   const [error, setError] = createSignal<string>();
   const latestSettings = useFerretSettings();
 
-  const options = (slot: string) => {
+  const options = (slot: (typeof SOUND_SLOTS)[number]["slot"]) => {
     const pick = props.settings.sounds[slot];
     const entries: Record<string, { title: string }> = {
       ferret: { title: "Ferret (default)" },
-      [NOISES_ID]: { title: NOISES_LABEL },
+      // each slot has its own ferret sound, so say which one
+      [NOISES_ID]: {
+        title: `Ferret noises: ${FERRET_NOISE_NAMES[slot]}`,
+      },
     };
     for (const sound of SOUND_LIBRARY)
       entries[sound.id] = { title: sound.name };

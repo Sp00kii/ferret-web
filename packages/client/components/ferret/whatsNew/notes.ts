@@ -17,7 +17,7 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
       {
         icon: "🦦",
         title: "Ferret noises",
-        text: "A new sound pack of dooks, hisses and squeaks for every sound, plus the Dook Party ringtone.",
+        text: "A new sound pack built from the Dook chirp, with its own pattern for every alert: dook-dook for messages, rising dooks when someone joins, plus the Dook Party ringtone.",
       },
       {
         icon: "🔔",
@@ -35,6 +35,11 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
         text: "Save all your Ferret settings and sounds to a file and restore them later (Settings → Ferret → App).",
       },
       {
+        icon: "🪟",
+        title: "Window buttons in settings",
+        text: "Minimise, maximise and close no longer disappear while settings or a dialog is open.",
+      },
+      {
         icon: "🖼️",
         title: "Cleaner GIF picker",
         text: "One favourite star per GIF and no more gibberish category names.",
@@ -42,7 +47,7 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
       {
         icon: "🥁",
         title: "Soundboard fixed",
-        text: "The soundboard panel now opens above the call buttons instead of staying hidden.",
+        text: "The soundboard panel now opens above the call buttons, has its own volume slider, and Happy dook and Boop sound like they should.",
       },
     ],
   },
