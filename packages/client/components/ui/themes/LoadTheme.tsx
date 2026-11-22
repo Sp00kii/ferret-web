@@ -38,9 +38,16 @@ export function LoadTheme() {
   const ferretStyle = () =>
     !!window.ferret && (ferretSettings()?.ferretStyle ?? true);
 
-  createEffect(() =>
-    document.body.toggleAttribute("data-ferret-style", ferretStyle()),
-  );
+  const ferretLook = () => ({
+    theme: ferretSettings()?.ferretTheme ?? "midnight",
+    accent: ferretSettings()?.ferretAccent ?? "copper",
+  });
+
+  createEffect(() => {
+    if (ferretStyle())
+      document.body.setAttribute("data-ferret-style", ferretLook().theme);
+    else document.body.removeAttribute("data-ferret-style");
+  });
 
   const getCssProps = createMemo(() => {
     const activeTheme = state.theme.activeTheme;
@@ -63,7 +70,9 @@ export function LoadTheme() {
       // mount --mdui-color triplet variables
       ...createMduiColourTriplets(activeTheme, "--mdui-color-"),
       // Ferret mod: Ferret palette + radii on top of the stock theme
-      ...(ferretStyle() ? ferretThemeVariables(activeTheme) : {}),
+      ...(ferretStyle()
+        ? ferretThemeVariables(ferretLook().theme, ferretLook().accent)
+        : {}),
     };
   });
 
@@ -123,10 +132,11 @@ export function LoadTheme() {
 
   //Match system UI (keyboard, form controls) to the theme
   createEffect(() => {
-    document.documentElement.style.colorScheme = state.theme.activeTheme
-      .darkMode
-      ? "dark"
-      : "light";
+    // Ferret mod: follow the Ferret theme while the Ferret style is on
+    const dark = ferretStyle()
+      ? ferretLook().theme !== "cream"
+      : state.theme.activeTheme.darkMode;
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
   });
 
   return <Masks />;

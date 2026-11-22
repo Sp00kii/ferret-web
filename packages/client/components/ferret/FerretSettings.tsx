@@ -33,6 +33,7 @@ import {
   useFerretSettings,
 } from "./settings";
 import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
+import { LookPicker } from "./theme/LookPicker";
 import { MicTest } from "./voice/MicTest";
 import { VoiceExtrasSettings } from "./voice/VoiceExtrasSettings";
 
@@ -71,7 +72,7 @@ export function FerretSettings() {
                   updateFerretSettings({ ferretStyle })
                 }
                 title="Ferret style"
-                description="Ferret's navy and copper look. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
+                description="Ferret's own themes and accent colours. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
               />
               <Toggle
                 icon="chat_bubble"
@@ -83,6 +84,9 @@ export function FerretSettings() {
                 description="Show new messages in a Ferret pop-up in the corner where you can reply straight away. Turn off to use normal Windows notifications. Which messages notify is still set in Settings → Notifications."
               />
             </CategoryButton.Group>
+            <Show when={config().ferretStyle}>
+              <LookPicker settings={config()} />
+            </Show>
           </Section>
 
           <Section title="Incoming calls">

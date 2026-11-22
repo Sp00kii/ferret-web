@@ -44,7 +44,8 @@ const Mark = styled("div", {
       fontWeight: 700,
       letterSpacing: "0.02em",
       lineHeight: 1,
-      color: "var(--md-sys-color-on-surface)",
+      // inherit, so it is white on the login panel and normal elsewhere
+      color: "inherit",
     },
   },
 });

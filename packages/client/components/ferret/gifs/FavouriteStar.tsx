@@ -57,7 +57,7 @@ const Star = styled("button", {
   },
   variants: {
     active: {
-      true: { color: "#F07835", opacity: 1 },
+      true: { color: "var(--ferret-accent, #F07835)", opacity: 1 },
       false: {},
     },
   },

@@ -1,3 +1,5 @@
+import type { FerretAccentName, FerretThemeName } from "./theme/looks";
+
 /**
  * Types for `window.ferret`, exposed by the Ferret desktop preload
  * (src/world/ferret.ts in the desktop repo). Undefined in a normal browser,
@@ -18,6 +20,9 @@ export type FerretSettings = {
   showConnectionQuality: boolean;
   /** Ferret's navy/copper look; off = stock Stoat theming */
   ferretStyle: boolean;
+  /** Which Ferret theme / accent colour (while ferretStyle is on) */
+  ferretTheme: FerretThemeName;
+  ferretAccent: FerretAccentName;
   /** Ferret pop-ups with a reply box instead of Windows notifications */
   notificationPopups: boolean;
   /** Per-sound choices; missing slots use Ferret's own sound */
@@ -58,6 +63,7 @@ export type FerretVoiceSettings = {
 
 export type MiniCallState = {
   inCall: boolean;
+  look?: Record<string, string>;
   callId: string;
   channelName?: string;
   serverName?: string;
@@ -88,6 +94,8 @@ export type FerretSettingsPatch = {
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
   notificationPopups?: boolean;
+  ferretTheme?: FerretThemeName;
+  ferretAccent?: FerretAccentName;
   sounds?: Partial<Record<string, { choice: string }>>;
   /** null removes the person; a null sound goes back to the normal one */
   people?: Record<
@@ -170,6 +178,7 @@ export interface FerretBridge {
       channelId: string;
       messageId?: string;
       canReply: boolean;
+      look?: Record<string, string>;
     }): void;
     onAction(
       callback: (

@@ -6,8 +6,20 @@ import type { Message } from "stoat.js";
 import { useClient } from "@revolt/client";
 
 import { useFerretSettings } from "../settings";
+import { popupColours } from "../theme/looks";
 
 const settings = useFerretSettings();
+
+/** Colours for the desktop pop-up windows, following the Ferret theme */
+export function popupLook() {
+  const config = settings();
+  return config?.ferretStyle === false
+    ? popupColours("midnight", "copper")
+    : popupColours(
+        config?.ferretTheme ?? "midnight",
+        config?.ferretAccent ?? "copper",
+      );
+}
 
 /**
  * Show a message as a Ferret pop-up instead of a Windows notification.
@@ -59,6 +71,7 @@ export function showFerretToast(message: Message, body: string | undefined) {
     channelId: channel.id,
     messageId: message.id,
     canReply,
+    look: popupLook(),
   });
   return true;
 }

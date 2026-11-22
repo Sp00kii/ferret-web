@@ -4,6 +4,7 @@ import { useClient } from "@revolt/client";
 import { useVoice } from "@revolt/rtc";
 
 import type { MiniCallState } from "../bridge";
+import { popupLook } from "../notifications/toasts";
 import { useFerretSettings } from "../settings";
 
 import { setMicChainConfig, setPushToTalkHeld } from "./micChain";
@@ -75,6 +76,7 @@ export function FerretVoice() {
       muted: !voice.microphone(),
       deafened: voice.deafen(),
       participants,
+      look: popupLook(),
     };
   }
 

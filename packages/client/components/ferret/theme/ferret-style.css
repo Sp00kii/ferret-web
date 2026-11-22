@@ -5,22 +5,33 @@
  */
 
 body[data-ferret-style] {
-  scrollbar-color: #343d55 transparent;
+  scrollbar-color: var(--ferret-scrollbar, #343d55) transparent;
 }
 
 body[data-ferret-style] ::selection {
-  background: rgb(240 120 53 / 0.35);
+  background: rgba(var(--ferret-accent-rgb, 240, 120, 53), 0.35);
 }
 
 body[data-ferret-style] :focus-visible {
-  outline-color: #f07835;
+  outline-color: var(--ferret-accent, #f07835);
 }
 
 body[data-ferret-style] ::-webkit-scrollbar-thumb {
-  background-color: #343d55;
+  background-color: var(--ferret-scrollbar, #343d55);
   border-radius: 8px;
 }
 
 body[data-ferret-style] ::-webkit-scrollbar-thumb:hover {
-  background-color: #4a5470;
+  background-color: var(--ferret-scrollbar-hover, #4a5470);
+}
+
+/* High contrast: thicker focus rings and underlined links */
+body[data-ferret-style="contrast"] :focus-visible {
+  outline-width: 3px !important;
+  outline-style: solid !important;
+  outline-offset: 2px;
+}
+
+body[data-ferret-style="contrast"] a {
+  text-decoration: underline;
 }
