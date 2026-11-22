@@ -1,4 +1,4 @@
-import { Show } from "solid-js";
+import { createMemo, Show } from "solid-js";
 import {
   TrackLoop,
   TrackReference,
@@ -13,6 +13,7 @@ import {
 import { Track } from "livekit-client";
 import { styled } from "styled-system/jsx";
 
+import { isSoundboardTrack } from "@revolt/ferret/voice/soundboard"; // Ferret mod
 import { useUser } from "@revolt/markdown/users";
 import { useVoice } from "@revolt/rtc";
 import { Avatar } from "@revolt/ui/components/design";
@@ -24,9 +25,14 @@ import { VoiceCallCardStatus } from "./VoiceCallCardStatus";
 
 export function VoiceCallCardPiP() {
   const voice = useVoice();
-  const audTracks = useTracks(
+  const micTracks = useTracks(
     [{ source: Track.Source.Microphone, withPlaceholder: true }],
     { onlySubscribed: false },
+  );
+  // Ferret mod: one avatar per person, not one per mic track (Ferret's
+  // soundboard clips have their own track)
+  const audTracks = createMemo(() =>
+    micTracks().filter((track) => !isSoundboardTrack(track.publication)),
   );
 
   const hasFocusVideo = () => {

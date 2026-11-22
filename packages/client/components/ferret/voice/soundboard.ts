@@ -149,21 +149,24 @@ function senderFor(room: Room) {
 
   /**
    * Stoat's server sets your "talking" state from mic track events, so this
-   * track always follows your real mic: muted together, and gone with it.
+   * track only exists while your real mic is on: it goes away when you mute
+   * or the mic goes, and comes back with your next clip.
    */
   const sync = async () => {
     const publication = await ready;
     if (!publication || sender?.room !== room) return;
     const mic = realMic(room);
-    if (!mic) {
+    if (!mic || mic.isMuted) {
+      // mic gone or muted: take the soundboard track away too. Stoat already
+      // shows you as not talking then, and it stops other apps' small call
+      // card listing you twice (it shows one avatar per mic track)
+      stopSoundboard();
+      closeSender();
       if (publication.track)
         await room.localParticipant
           .unpublishTrack(publication.track)
           .catch(() => {});
-      closeSender();
-    } else if (mic.isMuted && !publication.isMuted) {
-      await publication.mute();
-    } else if (!mic.isMuted && publication.isMuted) {
+    } else if (publication.isMuted) {
       await publication.unmute();
     }
   };
