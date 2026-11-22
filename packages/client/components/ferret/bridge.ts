@@ -25,6 +25,8 @@ export type FerretSettings = {
   ferretAccent: FerretAccentName;
   /** Ferret pop-ups with a reply box instead of Windows notifications */
   notificationPopups: boolean;
+  /** Alternative app icon (window + tray) */
+  appIcon: string;
   /** Per-sound choices; missing slots use Ferret's own sound */
   sounds: Partial<Record<string, FerretSoundChoice>>;
   voice: FerretVoiceSettings;
@@ -94,6 +96,7 @@ export type FerretSettingsPatch = {
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
   notificationPopups?: boolean;
+  appIcon?: string;
   ferretTheme?: FerretThemeName;
   ferretAccent?: FerretAccentName;
   sounds?: Partial<Record<string, { choice: string }>>;
@@ -158,6 +161,10 @@ export interface FerretBridge {
 
   /** App facts for the diagnostics panel (no paths or account info) */
   diagnostics(): Promise<Record<string, string | number> | null>;
+
+  /** Whether to show "What's new" (true only right after an update) */
+  whatsNew(): Promise<{ show: boolean; version: string } | null>;
+  whatsNewSeen(): Promise<boolean>;
 
   /** Waits (max 10 s) for a key or side mouse button; Escape cancels */
   capturePttBinding(): Promise<FerretSettings | null>;

@@ -28,6 +28,7 @@ import {
   FerretToastActions,
   FerretVoice,
   IncomingCalls,
+  WhatsNew,
 } from "@revolt/ferret"; // Ferret mod
 import { I18nProvider } from "@revolt/i18n";
 import { InstanceContext } from "@revolt/instance";
@@ -141,6 +142,7 @@ function MountContext(props: { children?: JSX.Element }) {
                   <FerretVoice />
                   <FerretDiagnostics />
                   <FerretToastActions />
+                  <WhatsNew />
                 </QueryClientProvider>
               </VoiceContext>
             </SoundContext>

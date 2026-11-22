@@ -1,8 +1,8 @@
 import "./ferret-style.css";
 import {
-  ACCENTS,
   type FerretAccentName,
   type FerretThemeName,
+  ACCENTS,
   lookColours,
 } from "./looks";
 
@@ -57,7 +57,9 @@ export function ferretThemeVariables(
         ? "#000000"
         : `radial-gradient(120% 90% at 0% 100%, rgba(${triplet(colours.primary)}, 0.38) 0%, transparent 58%), linear-gradient(145deg, #1d2440 0%, #151b30 60%, #101426 100%)`;
   // the panel is dark in every theme, so use the bright accent on it
-  variables["--ferret-hero-accent"] = (ACCENTS[accent] ?? ACCENTS.copper).dark.primary;
+  variables["--ferret-hero-accent"] = (
+    ACCENTS[accent] ?? ACCENTS.copper
+  ).dark.primary;
 
   return variables;
 }

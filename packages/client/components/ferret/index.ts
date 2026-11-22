@@ -8,3 +8,4 @@ export { ConnectionQualityBadge } from "./voice/ConnectionQuality";
 export { followPreferredDevices } from "./voice/devices";
 export { FerretVoice } from "./voice/FerretVoice";
 export { SoundboardButton } from "./voice/SoundboardButton";
+export { WhatsNew } from "./whatsNew/WhatsNew";

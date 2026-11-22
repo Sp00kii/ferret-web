@@ -33,9 +33,11 @@ import {
   useFerretSettings,
 } from "./settings";
 import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
+import { IconPicker } from "./theme/IconPicker";
 import { LookPicker } from "./theme/LookPicker";
 import { MicTest } from "./voice/MicTest";
 import { VoiceExtrasSettings } from "./voice/VoiceExtrasSettings";
+import { showWhatsNew } from "./whatsNew/WhatsNew";
 
 /**
  * "Ferret" page in user settings: everything the mod adds, in one place.
@@ -87,6 +89,7 @@ export function FerretSettings() {
             <Show when={config().ferretStyle}>
               <LookPicker settings={config()} />
             </Show>
+            <IconPicker settings={config()} />
           </Section>
 
           <Section title="Incoming calls">
@@ -488,6 +491,13 @@ function UpdatesSection() {
         onClick={() => !checking() && void check()}
       >
         Check for updates
+      </CategoryButton>
+      <CategoryButton
+        icon={<Symbol>new_releases</Symbol>}
+        description="The latest Ferret features at a glance"
+        onClick={showWhatsNew}
+      >
+        What's new
       </CategoryButton>
       <CategoryButton
         icon={<Symbol>code</Symbol>}
