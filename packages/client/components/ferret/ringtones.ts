@@ -6,7 +6,7 @@ const builtIn = (file: string) =>
 
 /**
  * Ringtones that ship with Ferret (files in public/ferret/ringtones).
- * The first one is the default. The .ogg ones are Ferret originals.
+ * The first one is the default. All of them are Ferret originals.
  */
 export const RINGTONES = [
   { id: "dook-ring", name: "Dook Ring", src: builtIn("dook-ring.ogg") },
@@ -18,13 +18,6 @@ export const RINGTONES = [
   },
   { id: "retro-phone", name: "Retro Phone", src: builtIn("retro-phone.ogg") },
   { id: "synthwave", name: "Synthwave", src: builtIn("synthwave.ogg") },
-  {
-    id: "starburst-candy",
-    name: "Starburst Candy",
-    src: builtIn("starburst-candy.mp3"),
-  },
-  { id: "my-phone", name: "My Phone", src: builtIn("my-phone.mp3") },
-  { id: "ringtone-231", name: "231", src: builtIn("ringtone-231.mp3") },
   // id kept as "classic" so existing settings keep working
   { id: "classic", name: "Ferret Chime", src: FERRET_SOUNDS.ringtoneIncoming },
 ];
