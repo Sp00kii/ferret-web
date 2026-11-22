@@ -11,7 +11,9 @@ import rimshot from "../sounds/board/rimshot.ogg";
 import sadTrombone from "../sounds/board/sad-trombone.ogg";
 import tada from "../sounds/board/tada.ogg";
 
-import { playIntoCall } from "./micChain";
+import { MAX_CLIP_SECONDS, playIntoCall } from "./micChain";
+
+const settings = useFerretSettings();
 
 /** Clips everyone in the call hears. All synthesized by Ferret. */
 export const SOUNDBOARD = [
@@ -38,12 +40,20 @@ export const SOUNDBOARD = [
   ),
 ];
 
+/** The user's own clips, served by the desktop app */
+export function customClips() {
+  return (settings()?.soundboard ?? []).map((clip) => ({
+    id: clip.id,
+    name: clip.name,
+    emoji: "🎵",
+    src: `/__ferret/soundboard/${clip.id}`,
+  }));
+}
+
 /** Stop people from spamming everyone's ears */
 const COOLDOWN_MS = 2500;
 const [coolingDown, setCoolingDown] = createSignal(false);
 export { coolingDown };
-
-const settings = useFerretSettings();
 
 /** Play a clip into the call and locally so you hear it too */
 export async function playSoundboard(src: string) {
@@ -55,6 +65,7 @@ export async function playSoundboard(src: string) {
   const local = new Audio(src);
   local.volume = volume;
   void local.play().catch(() => {});
+  setTimeout(() => local.pause(), MAX_CLIP_SECONDS * 1000);
 
   try {
     return await playIntoCall(src, volume);

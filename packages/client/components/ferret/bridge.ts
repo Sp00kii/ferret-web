@@ -21,6 +21,8 @@ export type FerretSettings = {
   /** Per-sound choices; missing slots use Ferret's own sound */
   sounds: Partial<Record<string, FerretSoundChoice>>;
   voice: FerretVoiceSettings;
+  /** The user's own soundboard clips */
+  soundboard: { id: string; name: string; file: string }[];
 };
 
 export type PttBinding = { kind: "key" | "mouse"; code: number; label: string };
@@ -101,6 +103,10 @@ export interface FerretBridge {
   pickSound(slot: string): Promise<FerretSettings>;
   clearSound(slot: string): Promise<FerretSettings>;
   resetSounds(): Promise<FerretSettings>;
+
+  addSoundboardClip(): Promise<FerretSettings>;
+  removeSoundboardClip(id: string): Promise<FerretSettings>;
+  renameSoundboardClip(id: string, name: string): Promise<FerretSettings>;
 
   showIncomingCall(call: {
     title: string;

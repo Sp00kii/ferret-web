@@ -112,7 +112,10 @@ export function FerretSettings() {
             <VoiceInputOptions />
             <MicTest />
             <VoiceProcessingOptions />
-            <VoiceExtrasSettings voice={config().voice} />
+            <VoiceExtrasSettings
+              voice={config().voice}
+              soundboard={config().soundboard}
+            />
             <CategoryButton.Group>
               <Toggle
                 icon="network_check"

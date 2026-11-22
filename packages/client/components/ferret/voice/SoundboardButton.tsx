@@ -6,7 +6,14 @@ import { useVoice } from "@revolt/rtc";
 import { IconButton } from "@revolt/ui/components/design";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
-import { SOUNDBOARD, coolingDown, playSoundboard } from "./soundboard";
+import { applyFerretSettings } from "../settings";
+
+import {
+  SOUNDBOARD,
+  coolingDown,
+  customClips,
+  playSoundboard,
+} from "./soundboard";
 
 /**
  * Soundboard in the call controls (desktop app only). Clips go into your
@@ -30,6 +37,30 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
   );
 
   const muted = () => !voice.microphone();
+  const [error, setError] = createSignal<string>();
+
+  const addClip = async () => {
+    setError(undefined);
+    try {
+      applyFerretSettings(await window.ferret!.addSoundboardClip());
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message.replace(/^.*Error: /, "") : String(e),
+      );
+    }
+  };
+
+  const clipButton = (clip: { name: string; emoji: string; src: string }) => (
+    <Clip
+      type="button"
+      title={clip.name}
+      disabled={coolingDown()}
+      onClick={() => void playSoundboard(clip.src)}
+    >
+      <span>{clip.emoji}</span>
+      {clip.name}
+    </Clip>
+  );
 
   return (
     <Wrapper ref={wrapper}>
@@ -53,20 +84,22 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
             </Show>
           </Heading>
           <Grid>
-            <For each={SOUNDBOARD}>
-              {(clip) => (
-                <Clip
-                  type="button"
-                  title={clip.name}
-                  disabled={coolingDown()}
-                  onClick={() => void playSoundboard(clip.src)}
-                >
-                  <span>{clip.emoji}</span>
-                  {clip.name}
-                </Clip>
-              )}
-            </For>
+            <For each={SOUNDBOARD}>{clipButton}</For>
           </Grid>
+          <Heading>
+            Your sounds
+            <small class="hint">Rename or remove in Settings → Ferret</small>
+          </Heading>
+          <Grid>
+            <For each={customClips()}>{clipButton}</For>
+            <Clip type="button" title="Add your own sound" onClick={addClip}>
+              <span>➕</span>
+              Add sound
+            </Clip>
+          </Grid>
+          <Show when={error()}>
+            <ErrorText>{error()}</ErrorText>
+          </Show>
         </Panel>
       </Show>
     </Wrapper>
@@ -84,6 +117,8 @@ const Panel = styled("div", {
     left: "50%",
     transform: "translateX(-50%)",
     width: "300px",
+    maxHeight: "min(460px, 70vh)",
+    overflowY: "auto",
     padding: "10px",
     borderRadius: "16px",
     zIndex: 10,
@@ -100,12 +135,13 @@ const Heading = styled("div", {
     justifyContent: "space-between",
     gap: "8px",
     fontWeight: 600,
-    padding: "0 4px 8px",
+    padding: "8px 4px",
     "& small": {
       fontWeight: 400,
       fontSize: "11px",
       color: "var(--md-sys-color-error)",
     },
+    "& small.hint": { color: "var(--md-sys-color-outline)" },
   },
 });
 
@@ -138,5 +174,13 @@ const Clip = styled("button", {
       background: "var(--md-sys-color-secondary-container)",
     },
     "&:disabled": { opacity: 0.5, cursor: "default" },
+  },
+});
+
+const ErrorText = styled("div", {
+  base: {
+    paddingTop: "8px",
+    fontSize: "12px",
+    color: "var(--md-sys-color-error)",
   },
 });

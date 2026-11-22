@@ -138,6 +138,9 @@ export function attachMicChain(context: AudioContext, source: AudioNode) {
 /** Whether there's a live mic stage to play soundboard clips into */
 export const canPlayIntoCall = () => chains.size > 0;
 
+/** Long uploads get cut off so nobody can blast a whole song */
+export const MAX_CLIP_SECONDS = 15;
+
 const decoded = new WeakMap<AudioContext, Map<string, Promise<AudioBuffer>>>();
 
 function decode(context: AudioContext, src: string) {
@@ -168,6 +171,7 @@ export async function playIntoCall(src: string, volume: number) {
     node.connect(gain).connect(chain.mix);
     node.onended = () => gain.disconnect();
     node.start();
+    node.stop(chain.context.currentTime + MAX_CLIP_SECONDS);
   });
   await Promise.all(played);
   return played.length > 0;

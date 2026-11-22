@@ -1,4 +1,4 @@
-import { Show, createResource, createSignal, onCleanup } from "solid-js";
+import { For, Show, createResource, createSignal, onCleanup } from "solid-js";
 
 import { styled } from "styled-system/jsx";
 
@@ -11,10 +11,15 @@ import {
   Text,
 } from "@revolt/ui";
 
-import type { FerretVoiceSettings } from "../bridge";
+import type { FerretSettings, FerretVoiceSettings } from "../bridge";
 import { applyFerretSettings, updateFerretSettings } from "../settings";
 
-import { canPlayIntoCall, micLevel, transmitting } from "./micChain";
+import {
+  MAX_CLIP_SECONDS,
+  canPlayIntoCall,
+  micLevel,
+  transmitting,
+} from "./micChain";
 
 const voicePatch = (
   patch: Parameters<typeof updateFerretSettings>[0]["voice"],
@@ -39,7 +44,10 @@ function toAccelerator(event: KeyboardEvent) {
   return [...parts, key].join("+");
 }
 
-export function VoiceExtrasSettings(props: { voice: FerretVoiceSettings }) {
+export function VoiceExtrasSettings(props: {
+  voice: FerretVoiceSettings;
+  soundboard: FerretSettings["soundboard"];
+}) {
   return (
     <>
       <PushToTalk voice={props.voice} />
@@ -57,6 +65,7 @@ export function VoiceExtrasSettings(props: { voice: FerretVoiceSettings }) {
         }
         labelFormatter={(value) => `${value}%`}
       />
+      <MySounds clips={props.soundboard} />
 
       <CategoryButton.Group>
         <CategoryButton
@@ -278,6 +287,100 @@ function Hotkeys(props: { voice: FerretVoiceSettings }) {
     </>
   );
 }
+
+let preview: HTMLAudioElement | undefined;
+
+function MySounds(props: { clips: FerretSettings["soundboard"] }) {
+  const [error, setError] = createSignal<string>();
+
+  const run = async (action: () => Promise<FerretSettings>) => {
+    setError(undefined);
+    try {
+      applyFerretSettings(await action());
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message.replace(/^.*Error: /, "") : String(e),
+      );
+    }
+  };
+
+  const play = (id: string) => {
+    preview?.pause();
+    preview = new Audio(`/__ferret/soundboard/${id}`);
+    void preview.play().catch(() => setError("Couldn't play this file."));
+    const current = preview;
+    setTimeout(() => current.pause(), MAX_CLIP_SECONDS * 1000);
+  };
+  onCleanup(() => preview?.pause());
+
+  return (
+    <>
+      <Text class="label">
+        Your soundboard sounds (up to 24, max 10 MB each; only the first{" "}
+        {MAX_CLIP_SECONDS} seconds play)
+      </Text>
+      <For each={props.clips}>
+        {(clip) => (
+          <ClipRow>
+            <Button variant="tonal" onPress={() => play(clip.id)}>
+              <Symbol>play_arrow</Symbol>
+            </Button>
+            <input
+              value={clip.name}
+              maxLength={32}
+              aria-label="Sound name"
+              onChange={(event) =>
+                void run(() =>
+                  window.ferret!.renameSoundboardClip(
+                    clip.id,
+                    event.currentTarget.value,
+                  ),
+                )
+              }
+            />
+            <Button
+              variant="tonal"
+              onPress={() =>
+                void run(() => window.ferret!.removeSoundboardClip(clip.id))
+              }
+            >
+              <Symbol>delete</Symbol>
+            </Button>
+          </ClipRow>
+        )}
+      </For>
+      <Buttons>
+        <Button
+          variant="tonal"
+          onPress={() => void run(() => window.ferret!.addSoundboardClip())}
+        >
+          <Symbol>upload_file</Symbol> Add a sound…
+        </Button>
+      </Buttons>
+      <Show when={error()}>
+        <Text class="label">{error()}</Text>
+      </Show>
+    </>
+  );
+}
+
+const ClipRow = styled("div", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--gap-md)",
+    "& input": {
+      flex: 1,
+      minWidth: 0,
+      padding: "8px 12px",
+      borderRadius: "var(--borderRadius-md, 8px)",
+      border: "1px solid var(--md-sys-color-outline-variant)",
+      background: "var(--md-sys-color-surface-container-highest)",
+      color: "var(--md-sys-color-on-surface)",
+      font: "inherit",
+    },
+  },
+});
 
 const Buttons = styled("div", {
   base: { display: "flex", flexWrap: "wrap", gap: "var(--gap-md)" },
