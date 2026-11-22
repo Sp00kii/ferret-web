@@ -475,7 +475,7 @@ export function UserContextMenu(props: {
             });
           }}
         >
-          Ferret sounds…
+          Ferret nickname & sounds…
         </ContextMenuButton>
       </Show>
 

@@ -8,14 +8,15 @@ import { Text } from "@revolt/ui";
 import { PersonSoundPickers } from "./PersonSoundPickers";
 
 /**
- * "Ferret sounds" card on someone's profile: give them their own ringtone
- * or message sound right there. Desktop app only; not for yourself or bots.
+ * Ferret card on someone's profile: a private nickname, their own ringtone
+ * and message sound, and their soundboard volume. Desktop app only; not
+ * for yourself or bots.
  */
 export function ProfileSounds(props: { user: User }) {
   return (
     <Show when={window.ferret && !props.user.self && !props.user.bot}>
       <Card>
-        <Text class="label">Ferret sounds for {props.user.displayName}</Text>
+        <Text class="label">Just for you (Ferret)</Text>
         <PersonSoundPickers
           userId={props.user.id}
           name={props.user.displayName}

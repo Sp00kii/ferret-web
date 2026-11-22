@@ -13,7 +13,7 @@ const MAX_MATCHES = 8;
 
 /**
  * Give friends their own ringtone and / or message sound. People can also
- * be added from their right-click menu ("Ferret sounds…").
+ * be added from their right-click menu ("Ferret nickname & sounds…").
  */
 export function PeopleSounds(props: { settings: FerretSettings }) {
   const client = useClient();
@@ -58,12 +58,12 @@ export function PeopleSounds(props: { settings: FerretSettings }) {
   return (
     <Column gap="md">
       <Text class="title" size="large">
-        Sounds for specific people
+        Specific people
       </Text>
       <Text class="label">
-        Give someone their own ringtone or message sound, so you know who it is
-        without looking, or mute their soundboard. You can also right-click
-        anyone and pick "Ferret sounds…".
+        Give someone a nickname only you see, their own ringtone or message
+        sound, or turn their soundboard down. You can also right-click anyone
+        and pick "Ferret nickname & sounds…".
       </Text>
 
       <For each={people()}>

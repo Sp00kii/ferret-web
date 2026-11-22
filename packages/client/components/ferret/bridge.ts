@@ -27,6 +27,8 @@ export type FerretSettings = {
   ferretAccentCustom: string;
   /** Ferret pop-ups with a reply box instead of Windows notifications */
   notificationPopups: boolean;
+  /** Ferret makes previews for links Stoat didn't preview */
+  linkPreviews: boolean;
   /** Alternative app icon (window + tray) */
   appIcon: string;
   /** Page zoom in percent (50-200) */
@@ -40,6 +42,8 @@ export type FerretSettings = {
   soundboard: { id: string; name: string; file: string }[];
   /** Per-person ringtone / message sound, keyed by user id */
   people: Record<string, FerretPersonSounds>;
+  /** Private nicknames, keyed by user id; only you see them */
+  nicknames: Record<string, string>;
 };
 
 export type FerretPersonSounds = {
@@ -49,6 +53,18 @@ export type FerretPersonSounds = {
   message: FerretSoundChoice | null;
   /** Don't play this person's soundboard clips */
   muteSoundboard?: boolean;
+  /** 0-100, volume of this person's clips (missing = 100) */
+  soundboardVolume?: number;
+};
+
+export type FerretLinkPreview = {
+  url: string;
+  siteName: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  largeImage: boolean;
+  colour?: string;
 };
 
 export type PttBinding = { kind: "key" | "mouse"; code: number; label: string };
@@ -108,6 +124,9 @@ export type FerretSettingsPatch = {
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
   notificationPopups?: boolean;
+  linkPreviews?: boolean;
+  /** an empty string or null removes the nickname */
+  nicknames?: Record<string, string | null>;
   appIcon?: string;
   zoom?: number;
   pauseAnimations?: boolean | null;
@@ -123,6 +142,7 @@ export type FerretSettingsPatch = {
       ringtone?: { choice: string } | null;
       message?: { choice: string } | null;
       muteSoundboard?: boolean;
+      soundboardVolume?: number;
     } | null
   >;
   voice?: Partial<Omit<FerretVoiceSettings, "pttBinding">> & {
@@ -186,6 +206,9 @@ export interface FerretBridge {
   /** Whether to show "What's new" (true only right after an update) */
   whatsNew(): Promise<{ show: boolean; version: string } | null>;
   whatsNewSeen(): Promise<boolean>;
+
+  /** Ferret's own preview for a link, or null */
+  linkPreview(url: string): Promise<FerretLinkPreview | null>;
 
   /** Save / restore a .ferret-backup file (settings + own sound files) */
   exportSettings(): Promise<BackupResult | null>;

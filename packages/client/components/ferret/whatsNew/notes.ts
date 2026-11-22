@@ -7,6 +7,36 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.8",
+    items: [
+      {
+        icon: "🔗",
+        title: "Previews for every link",
+        text: "Links that Stoat can't preview get a Discord-style card with the title, description and picture. Turn it off in Settings → Ferret → Appearance.",
+      },
+      {
+        icon: "🏷️",
+        title: "Private nicknames",
+        text: "Give friends a nickname only you see, shown everywhere in Ferret. Right-click someone → Ferret nickname & sounds…",
+      },
+      {
+        icon: "🔉",
+        title: "Soundboard volume per person",
+        text: "Turn one person's soundboard down without muting it, from their profile or Settings → Ferret.",
+      },
+      {
+        icon: "🖱️",
+        title: "Middle-click and ferret:// links",
+        text: "Middle-clicking a reply or search result opens it inside Ferret, and ferret:// links now open the right page.",
+      },
+      {
+        icon: "🖥️",
+        title: "No surprise desktop shortcut",
+        text: "Updates no longer put the desktop shortcut back after you deleted it.",
+      },
+    ],
+  },
+  {
     version: "1.0.7",
     items: [
       {

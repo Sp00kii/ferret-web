@@ -1,7 +1,10 @@
 import { Show, createSignal } from "solid-js";
 
-import { CategoryButton, Checkbox, Symbol, Text } from "@revolt/ui";
+import { styled } from "styled-system/jsx";
 
+import { CategoryButton, Checkbox, Slider, Symbol, Text } from "@revolt/ui";
+
+import { nicknameFor } from "./nicknames";
 import { NOISES_ID, NOISES_LABEL } from "./noises";
 import {
   type PersonSoundKind,
@@ -26,8 +29,8 @@ function play(src: string | undefined) {
 }
 
 /**
- * Ringtone + message sound pickers for one person. Used in Settings ->
- * Ferret and on the person's profile. Picking a sound for someone who isn't
+ * Private nickname, ringtone + message sound pickers and soundboard volume
+ * for one person. Used in Settings -> Ferret and on the person's profile. Picking a sound for someone who isn't
  * in the list yet adds them.
  */
 export function PersonSoundPickers(props: { userId: string; name: string }) {
@@ -109,6 +112,7 @@ export function PersonSoundPickers(props: { userId: string; name: string }) {
 
   return (
     <>
+      <NicknameField userId={props.userId} />
       <CategoryButton.Group>
         <CategoryButton.Select
           icon={<Symbol>ring_volume</Symbol>}
@@ -133,9 +137,79 @@ export function PersonSoundPickers(props: { userId: string; name: string }) {
           Mute their soundboard
         </CategoryButton>
       </CategoryButton.Group>
+      <Show when={!person()?.muteSoundboard}>
+        <Text class="label">Their soundboard volume (just for you)</Text>
+        <Slider
+          min={0}
+          max={100}
+          step={5}
+          value={person()?.soundboardVolume ?? 100}
+          onChange={(event) =>
+            void updateFerretSettings({
+              people: {
+                [props.userId]: {
+                  name: props.name,
+                  soundboardVolume: event.currentTarget.value,
+                },
+              },
+            })
+          }
+          labelFormatter={(value) => `${value}%`}
+        />
+      </Show>
       <Show when={error()}>
         <Text class="label">{error()}</Text>
       </Show>
     </>
   );
 }
+
+/** A name for this person that only you see, everywhere in Ferret */
+function NicknameField(props: { userId: string }) {
+  const [error, setError] = createSignal<string>();
+
+  const save = async (value: string) => {
+    setError(undefined);
+    try {
+      await updateFerretSettings({
+        nicknames: { [props.userId]: value.trim() || null },
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  return (
+    <>
+      <Input
+        value={nicknameFor(props.userId) ?? ""}
+        placeholder="Nickname (only you see it)"
+        maxLength={32}
+        aria-label="Private nickname"
+        onChange={(event) => void save(event.currentTarget.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+      />
+      <Show when={error()}>
+        <Text class="label">{error()}</Text>
+      </Show>
+    </>
+  );
+}
+
+const Input = styled("input", {
+  base: {
+    width: "100%",
+    padding: "10px 12px",
+    border: "none",
+    borderRadius: "var(--borderRadius-md)",
+    fontSize: "14px",
+    color: "var(--md-sys-color-on-surface)",
+    background: "var(--md-sys-color-surface-container-high)",
+    outline: "none",
+    "&:focus": {
+      boxShadow: "0 0 0 2px var(--md-sys-color-primary)",
+    },
+  },
+});

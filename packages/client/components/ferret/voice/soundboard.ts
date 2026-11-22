@@ -310,7 +310,9 @@ export function incomingSoundboard(userId: string) {
     muted:
       voice?.hearSoundboards === false ||
       !!config?.people[userId]?.muteSoundboard,
-    volume: (voice?.othersSoundboardVolume ?? 100) / 100,
+    volume:
+      ((voice?.othersSoundboardVolume ?? 100) / 100) *
+      ((config?.people[userId]?.soundboardVolume ?? 100) / 100),
   };
 }
 

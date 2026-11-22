@@ -27,6 +27,7 @@ import {
   FerretBadge,
   FerretDiagnostics,
   FerretMotion,
+  FerretNavigation,
   FerretToastActions,
   FerretVoice,
   IncomingCalls,
@@ -149,6 +150,7 @@ function MountContext(props: { children?: JSX.Element }) {
                   <FerretBadge />
                   <FerretMotion />
                   <QuickSwitcher />
+                  <FerretNavigation />
                 </QueryClientProvider>
               </VoiceContext>
             </SoundContext>

@@ -158,6 +158,15 @@ export function FerretSettings() {
                     title="Pause GIFs and animated emoji until hovered"
                     description="Animated pictures, emoji and avatars stay still until you point at them. Starts out following Windows' animation setting."
                   />
+                  <Toggle
+                    icon="link"
+                    checked={config().linkPreviews}
+                    onToggle={(linkPreviews) =>
+                      updateFerretSettings({ linkPreviews })
+                    }
+                    title="Previews for every link"
+                    description="Some sites block Stoat's link previews. Ferret then fetches the page's title and picture itself, so the site sees your IP address, like when you open the link."
+                  />
                 </CategoryButton.Group>
                 <Text class="label">
                   Tip: press Ctrl+K anywhere to jump to a friend, channel or

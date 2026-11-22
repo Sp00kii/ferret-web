@@ -20,6 +20,8 @@ import { decodeTime } from "ulid";
 
 import { useClient } from "@revolt/client";
 import { isGif } from "@revolt/common/lib/gifs";
+import { LinkPreviews } from "@revolt/ferret/LinkPreviews"; // Ferret mod
+import { nicknameFor } from "@revolt/ferret/nicknames"; // Ferret mod
 import { useTime } from "@revolt/i18n";
 import { Markdown } from "@revolt/markdown";
 import { startsWithPackPUA } from "@revolt/markdown/emoji/UnicodeEmoji";
@@ -174,6 +176,8 @@ export function Message(props: Props) {
             <Username
               username={
                 props.message.masquerade?.name ??
+                // Ferret mod: your private nickname for them
+                nicknameFor(props.message.authorId) ??
                 props.message.member?.nickname ??
                 props.message.author?.displayName ??
                 props.message.author?.username ??
@@ -405,6 +409,8 @@ export function Message(props: Props) {
         <For each={props.message.embeds}>
           {(embed) => <Embed embed={embed} />}
         </For>
+        {/* Ferret mod: previews for links Stoat couldn't preview */}
+        <LinkPreviews message={props.message} />
         <Reactions
           reactions={
             props.message.reactions as never as Map<string, Set<string>>
