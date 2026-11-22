@@ -39,6 +39,11 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
         title: "Cleaner GIF picker",
         text: "One favourite star per GIF and no more gibberish category names.",
       },
+      {
+        icon: "🥁",
+        title: "Soundboard fixed",
+        text: "The soundboard panel now opens above the call buttons instead of staying hidden.",
+      },
     ],
   },
   {

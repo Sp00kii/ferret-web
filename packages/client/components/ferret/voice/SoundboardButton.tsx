@@ -1,4 +1,5 @@
 import { For, Show, createSignal, onCleanup } from "solid-js";
+import { Portal } from "solid-js/web";
 
 import { styled } from "styled-system/jsx";
 
@@ -24,17 +25,44 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
 
   const voice = useVoice();
   const [open, setOpen] = createSignal(false);
+  // where the panel goes: above the button, kept inside the window
+  const [spot, setSpot] = createSignal({ left: 0, bottom: 0 });
   let wrapper: HTMLDivElement | undefined;
+  let panel: HTMLDivElement | undefined;
+
+  /**
+   * The panel is drawn at page level (a portal) and placed above the
+   * button: the call bar hides anything that sticks out of it, which made
+   * the panel invisible (the button lit up but nothing appeared).
+   */
+  const place = () => {
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const left = rect.left + rect.width / 2 - PANEL_WIDTH / 2;
+    setSpot({
+      left: Math.max(8, Math.min(left, window.innerWidth - PANEL_WIDTH - 8)),
+      bottom: window.innerHeight - rect.top + 10,
+    });
+  };
+
+  const toggle = () => {
+    if (!open()) place();
+    setOpen((value) => !value);
+  };
 
   const onPointerDown = (event: PointerEvent) => {
-    if (open() && wrapper && !wrapper.contains(event.target as Node)) {
+    const target = event.target as Node;
+    if (open() && !wrapper?.contains(target) && !panel?.contains(target)) {
       setOpen(false);
     }
   };
+  const onResize = () => open() && place();
   document.addEventListener("pointerdown", onPointerDown, true);
-  onCleanup(() =>
-    document.removeEventListener("pointerdown", onPointerDown, true),
-  );
+  window.addEventListener("resize", onResize);
+  onCleanup(() => {
+    document.removeEventListener("pointerdown", onPointerDown, true);
+    window.removeEventListener("resize", onResize);
+  });
 
   const muted = () => !voice.microphone();
   const [error, setError] = createSignal<string>();
@@ -67,7 +95,7 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
       <IconButton
         size={props.size}
         variant={open() ? "filled" : "tonal"}
-        onPress={() => setOpen((value) => !value)}
+        onPress={toggle}
         isDisabled={!voice.speakingPermission}
         use:floating={{
           tooltip: { placement: "top", content: "Soundboard" },
@@ -76,31 +104,39 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
         <Symbol>graphic_eq</Symbol>
       </IconButton>
       <Show when={open()}>
-        <Panel>
-          <Heading>
-            Soundboard
-            <Show when={muted()}>
-              <small>Unmute so others can hear it</small>
+        <Portal>
+          <Panel
+            ref={panel}
+            style={{
+              left: `${spot().left}px`,
+              bottom: `${spot().bottom}px`,
+            }}
+          >
+            <Heading>
+              Soundboard
+              <Show when={muted()}>
+                <small>Unmute so others can hear it</small>
+              </Show>
+            </Heading>
+            <Grid>
+              <For each={SOUNDBOARD}>{clipButton}</For>
+            </Grid>
+            <Heading>
+              Your sounds
+              <small class="hint">Rename or remove in Settings → Ferret</small>
+            </Heading>
+            <Grid>
+              <For each={customClips()}>{clipButton}</For>
+              <Clip type="button" title="Add your own sound" onClick={addClip}>
+                <span>➕</span>
+                Add sound
+              </Clip>
+            </Grid>
+            <Show when={error()}>
+              <ErrorText>{error()}</ErrorText>
             </Show>
-          </Heading>
-          <Grid>
-            <For each={SOUNDBOARD}>{clipButton}</For>
-          </Grid>
-          <Heading>
-            Your sounds
-            <small class="hint">Rename or remove in Settings → Ferret</small>
-          </Heading>
-          <Grid>
-            <For each={customClips()}>{clipButton}</For>
-            <Clip type="button" title="Add your own sound" onClick={addClip}>
-              <span>➕</span>
-              Add sound
-            </Clip>
-          </Grid>
-          <Show when={error()}>
-            <ErrorText>{error()}</ErrorText>
-          </Show>
-        </Panel>
+          </Panel>
+        </Portal>
       </Show>
     </Wrapper>
   );
@@ -110,18 +146,18 @@ const Wrapper = styled("div", {
   base: { position: "relative", display: "flex" },
 });
 
+const PANEL_WIDTH = 300;
+
 const Panel = styled("div", {
   base: {
-    position: "absolute",
-    bottom: "calc(100% + 10px)",
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "300px",
+    position: "fixed",
+    width: `${PANEL_WIDTH}px`,
     maxHeight: "min(460px, 70vh)",
     overflowY: "auto",
     padding: "10px",
     borderRadius: "16px",
-    zIndex: 10,
+    // above the call window and the rest of the page
+    zIndex: 1000,
     background: "var(--md-sys-color-surface-container-high)",
     color: "var(--md-sys-color-on-surface)",
     boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
