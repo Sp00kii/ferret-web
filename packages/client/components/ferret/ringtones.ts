@@ -6,16 +6,18 @@ const builtIn = (file: string) =>
 
 /**
  * Ringtones that ship with Ferret (files in public/ferret/ringtones).
- * The first one is the default.
+ * The first one is the default. The .ogg ones are Ferret originals.
  */
 export const RINGTONES = [
-  { id: "franklin", name: "Franklin", src: builtIn("franklin.mp3") },
+  { id: "dook-ring", name: "Dook Ring", src: builtIn("dook-ring.ogg") },
+  { id: "arcade", name: "Arcade", src: builtIn("arcade.ogg") },
   {
-    id: "discord-halloween",
-    name: "Discord Halloween",
-    src: builtIn("discord-halloween.mp3"),
+    id: "marimba-bounce",
+    name: "Marimba Bounce",
+    src: builtIn("marimba-bounce.ogg"),
   },
-  { id: "omori", name: "OMORI", src: builtIn("omori.mp3") },
+  { id: "retro-phone", name: "Retro Phone", src: builtIn("retro-phone.ogg") },
+  { id: "synthwave", name: "Synthwave", src: builtIn("synthwave.ogg") },
   {
     id: "starburst-candy",
     name: "Starburst Candy",
