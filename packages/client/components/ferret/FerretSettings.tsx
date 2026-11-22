@@ -34,6 +34,7 @@ import {
 } from "./diagnostics/DiagnosticsSection";
 import { FERRET_DONATE_URL } from "./links";
 import { pauseAnimationsActive } from "./motion/FerretMotion";
+import { FERRET_NOISES, NOISES_ID, NOISES_LABEL } from "./noises";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
@@ -478,6 +479,7 @@ function SoundsSection(props: { settings: FerretSettingsType }) {
     const pick = props.settings.sounds[slot];
     const entries: Record<string, { title: string }> = {
       ferret: { title: "Ferret (default)" },
+      [NOISES_ID]: { title: NOISES_LABEL },
     };
     for (const sound of SOUND_LIBRARY)
       entries[sound.id] = { title: sound.name };
@@ -539,6 +541,19 @@ function SoundsSection(props: { settings: FerretSettingsType }) {
           }
         >
           <Symbol>restart_alt</Symbol> Reset all to Ferret
+        </Button>
+        <Button
+          variant="tonal"
+          onPress={async () => {
+            await updateFerretSettings({
+              sounds: Object.fromEntries(
+                SOUND_SLOTS.map((entry) => [entry.slot, { choice: NOISES_ID }]),
+              ),
+            });
+            previewSound(FERRET_NOISES.message);
+          }}
+        >
+          <Symbol>pets</Symbol> Use ferret noises for everything
         </Button>
       </Buttons>
       <Show when={error()}>

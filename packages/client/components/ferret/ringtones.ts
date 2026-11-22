@@ -1,4 +1,5 @@
 import type { FerretSettings } from "./bridge";
+import { FERRET_NOISES } from "./noises";
 import { FERRET_SOUNDS } from "./sounds";
 
 const builtIn = (file: string) =>
@@ -20,6 +21,11 @@ export const RINGTONES = [
   { id: "synthwave", name: "Synthwave", src: builtIn("synthwave.ogg") },
   // id kept as "classic" so existing settings keep working
   { id: "classic", name: "Ferret Chime", src: FERRET_SOUNDS.ringtoneIncoming },
+  {
+    id: "dook-party",
+    name: "Dook Party (ferret noises)",
+    src: FERRET_NOISES.ringtoneIncoming,
+  },
 ];
 
 /** Played if the chosen sound can't be loaded */

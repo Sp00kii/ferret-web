@@ -1,4 +1,5 @@
 import type { FerretSettings } from "./bridge";
+import { FERRET_NOISES, NOISES_ID } from "./noises";
 import { RINGTONES } from "./ringtones";
 import { SOUND_LIBRARY } from "./soundLibrary";
 import { FERRET_SOUNDS } from "./sounds";
@@ -40,5 +41,6 @@ export function personMessageSource(
       : undefined;
   }
   if (pick.choice === "ferret") return FERRET_SOUNDS.message;
+  if (pick.choice === NOISES_ID) return FERRET_NOISES.message;
   return SOUND_LIBRARY.find((sound) => sound.id === pick.choice)?.src;
 }

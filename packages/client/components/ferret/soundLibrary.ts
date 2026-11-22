@@ -1,6 +1,7 @@
 import type { TypeSounds } from "@revolt/state";
 
 import type { FerretSettings } from "./bridge";
+import { FERRET_NOISES, NOISES_ID } from "./noises";
 import { personMessageSource } from "./people";
 import { useFerretSettings } from "./settings";
 import { FERRET_SOUNDS } from "./sounds";
@@ -50,6 +51,7 @@ export function soundSource(
   if (pick?.choice === "custom" && pick.customFileName) {
     return `/__ferret/sound/${slot}?v=${encodeURIComponent(pick.customFileName)}`;
   }
+  if (pick?.choice === NOISES_ID) return FERRET_NOISES[slot];
   const library = SOUND_LIBRARY.find((sound) => sound.id === pick?.choice);
   return library?.src ?? FERRET_SOUNDS[slot];
 }

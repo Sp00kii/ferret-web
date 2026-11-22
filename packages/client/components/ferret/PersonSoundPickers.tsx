@@ -2,6 +2,7 @@ import { Show, createSignal } from "solid-js";
 
 import { CategoryButton, Symbol, Text } from "@revolt/ui";
 
+import { NOISES_ID, NOISES_LABEL } from "./noises";
 import {
   type PersonSoundKind,
   personMessageSource,
@@ -47,6 +48,7 @@ export function PersonSoundPickers(props: { userId: string; name: string }) {
       for (const tone of RINGTONES) entries[tone.id] = { title: tone.name };
     } else {
       entries.ferret = { title: "Ferret" };
+      entries[NOISES_ID] = { title: NOISES_LABEL };
       for (const sound of SOUND_LIBRARY)
         entries[sound.id] = { title: sound.name };
     }
