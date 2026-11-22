@@ -200,7 +200,8 @@ export function NotificationsWorker() {
     )
       return;
 
-    sound.playSound("message");
+    // Ferret mod: pass the author for per-person message sounds
+    sound.playSound("message", false, message.authorId);
 
     const notification = new Notification(title!, {
       icon,

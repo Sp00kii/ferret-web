@@ -9,6 +9,7 @@ import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
 import { Avatar, Button, Symbol, Text } from "@revolt/ui";
 
+import { personRingtoneSource } from "./people";
 import { FALLBACK_RINGTONE, ringtoneSource } from "./ringtones";
 import { useFerretSettings } from "./settings";
 
@@ -76,9 +77,11 @@ export function IncomingCalls() {
     }
   }
 
-  function playRingtone() {
+  function playRingtone(callerId: string) {
     const config = settings()!;
-    const element = new Audio(ringtoneSource(config.ringtone));
+    const element = new Audio(
+      personRingtoneSource(config, callerId) ?? ringtoneSource(config.ringtone),
+    );
     element.loop = true;
     element.volume = config.ringtone.volume / 100;
 
@@ -104,7 +107,7 @@ export function IncomingCalls() {
   function start(channel: Channel, callerId: string) {
     stop();
     setRinging({ channel, callerId });
-    playRingtone();
+    playRingtone(callerId);
     timeout = setTimeout(stop, RING_TIMEOUT_MS);
     window.ferret?.showIncomingCall({
       ...describe(channel, callerId),

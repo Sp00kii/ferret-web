@@ -73,7 +73,12 @@ export class SoundController {
    * @param force Bypass canPlay check
    * @returns Whether the sound played
    */
-  playSound(sound: keyof TypeSounds, force?: boolean): boolean {
+  playSound(
+    sound: keyof TypeSounds,
+    force?: boolean,
+    // Ferret mod: who caused the sound, for per-person message sounds
+    from?: string,
+  ): boolean {
     if (!force && !this.canPlay(sound)) {
       return false;
     }
@@ -137,7 +142,7 @@ export class SoundController {
     }
     // Ferret mod: Ferret's sounds, or whatever the user picked per sound (the
     // open-source fallback sounds are silent placeholders and a click)
-    if (window.ferret) this.node = new Audio(currentSoundSource(sound));
+    if (window.ferret) this.node = new Audio(currentSoundSource(sound, from));
     this.lastPlayedSound = sound;
     this.node.play();
     return true;

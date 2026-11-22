@@ -1,5 +1,6 @@
 import { Trans } from "@lingui/solid/macro";
 import { useClient } from "@revolt/client";
+import { updateFerretSettings } from "@revolt/ferret/settings"; // Ferret mod
 import { useModals } from "@revolt/modal";
 import { useSmartParams } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -447,6 +448,29 @@ export function UserContextMenu(props: {
         </ContextMenuButton>
 
         <ContextMenuDivider />
+      </Show>
+
+      {/* Ferret mod: per-person ringtone / message sound */}
+      <Show when={window.ferret && !props.user.self && !props.user.bot}>
+        <ContextMenuButton
+          icon={
+            <IconSlot>
+              <Symbol size={16}>music_note</Symbol>
+            </IconSlot>
+          }
+          onClick={() => {
+            void updateFerretSettings({
+              people: { [props.user.id]: { name: props.user.displayName } },
+            });
+            openModal({
+              type: "settings",
+              config: "user",
+              context: { page: "ferret" },
+            });
+          }}
+        >
+          Ferret sounds…
+        </ContextMenuButton>
       </Show>
 
       {/* Quick actions: Profile, Message, Mention */}

@@ -23,6 +23,15 @@ export type FerretSettings = {
   voice: FerretVoiceSettings;
   /** The user's own soundboard clips */
   soundboard: { id: string; name: string; file: string }[];
+  /** Per-person ringtone / message sound, keyed by user id */
+  people: Record<string, FerretPersonSounds>;
+};
+
+export type FerretPersonSounds = {
+  name: string;
+  /** null = the normal ringtone / message sound */
+  ringtone: FerretSoundChoice | null;
+  message: FerretSoundChoice | null;
 };
 
 export type PttBinding = { kind: "key" | "mouse"; code: number; label: string };
@@ -77,6 +86,15 @@ export type FerretSettingsPatch = {
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
   sounds?: Partial<Record<string, { choice: string }>>;
+  /** null removes the person; a null sound goes back to the normal one */
+  people?: Record<
+    string,
+    {
+      name?: string;
+      ringtone?: { choice: string } | null;
+      message?: { choice: string } | null;
+    } | null
+  >;
   voice?: Partial<Omit<FerretVoiceSettings, "pttBinding">> & {
     pttBinding?: null;
   };
@@ -103,6 +121,11 @@ export interface FerretBridge {
   pickSound(slot: string): Promise<FerretSettings>;
   clearSound(slot: string): Promise<FerretSettings>;
   resetSounds(): Promise<FerretSettings>;
+
+  pickPersonSound(
+    userId: string,
+    kind: "ringtone" | "message",
+  ): Promise<FerretSettings>;
 
   addSoundboardClip(): Promise<FerretSettings>;
   removeSoundboardClip(id: string): Promise<FerretSettings>;

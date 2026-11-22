@@ -21,6 +21,7 @@ import type {
   UpdateCheckResult,
 } from "./bridge";
 import { FERRET_DONATE_URL } from "./links";
+import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
   applyFerretSettings,
@@ -107,6 +108,8 @@ export function FerretSettings() {
           <WatchedChannels watched={config().watchedVoiceChannels} />
 
           <SoundsSection settings={config()} />
+
+          <PeopleSounds settings={config()} />
 
           <Section title="Voice">
             <VoiceInputOptions />

@@ -1,6 +1,7 @@
 import type { TypeSounds } from "@revolt/state";
 
 import type { FerretSettings } from "./bridge";
+import { personMessageSource } from "./people";
 import { useFerretSettings } from "./settings";
 import { FERRET_SOUNDS } from "./sounds";
 import bell from "./sounds/library/bell.ogg";
@@ -55,7 +56,14 @@ export function soundSource(
 
 const settings = useFerretSettings();
 
-/** The file to play for a sound right now, following the user's choices */
-export function currentSoundSource(slot: Slot) {
-  return soundSource(slot, settings());
+/**
+ * The file to play for a sound right now, following the user's choices.
+ * `from` is who caused it, for per-person message sounds.
+ */
+export function currentSoundSource(slot: Slot, from?: string) {
+  const config = settings();
+  return (
+    (slot === "message" && personMessageSource(config, from)) ||
+    soundSource(slot, config)
+  );
 }
