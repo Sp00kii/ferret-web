@@ -1,6 +1,7 @@
 import { createContext, JSXElement, useContext } from "solid-js";
 
 import { currentSoundSource } from "@revolt/ferret/soundLibrary"; // Ferret mod
+import { trackAudio } from "@revolt/ferret/stopSounds"; // Ferret mod
 import { Sounds, TypeSounds, useState } from "@revolt/state";
 import deafenSound from "../../public/assets/sounds/deafen.ogg";
 import messageSound from "../../public/assets/sounds/message_sound.ogg";
@@ -142,7 +143,12 @@ export class SoundController {
     }
     // Ferret mod: Ferret's sounds, or whatever the user picked per sound (the
     // open-source fallback sounds are silent placeholders and a click)
-    if (window.ferret) this.node = new Audio(currentSoundSource(sound, from));
+    if (window.ferret) {
+      this.node = new Audio(currentSoundSource(sound, from));
+      // a long custom file as an alert stops after a few seconds (or with
+      // the Stop sound button); ringtones keep playing until answered
+      trackAudio(this.node, sound.startsWith("ringtone") ? undefined : 5);
+    }
     this.lastPlayedSound = sound;
     this.node.play();
     return true;

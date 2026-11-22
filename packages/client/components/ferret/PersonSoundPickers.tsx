@@ -1,6 +1,6 @@
 import { Show, createSignal } from "solid-js";
 
-import { CategoryButton, Symbol, Text } from "@revolt/ui";
+import { CategoryButton, Checkbox, Symbol, Text } from "@revolt/ui";
 
 import { NOISES_ID, NOISES_LABEL } from "./noises";
 import {
@@ -15,15 +15,14 @@ import {
   useFerretSettings,
 } from "./settings";
 import { SOUND_LIBRARY } from "./soundLibrary";
+import { trackAudio } from "./stopSounds";
 
 let preview: HTMLAudioElement | undefined;
 function play(src: string | undefined) {
   if (!src) return;
   preview?.pause();
-  preview = new Audio(src);
+  preview = trackAudio(new Audio(src), 5);
   void preview.play().catch(() => {});
-  const current = preview;
-  setTimeout(() => current.pause(), 5000);
 }
 
 /**
@@ -92,6 +91,22 @@ export function PersonSoundPickers(props: { userId: string; name: string }) {
     );
   };
 
+  const toggleSoundboard = async () => {
+    setError(undefined);
+    try {
+      await updateFerretSettings({
+        people: {
+          [props.userId]: {
+            name: props.name,
+            muteSoundboard: !person()?.muteSoundboard,
+          },
+        },
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  };
+
   return (
     <>
       <CategoryButton.Group>
@@ -109,6 +124,14 @@ export function PersonSoundPickers(props: { userId: string; name: string }) {
           options={options("message")}
           onUpdate={(choice) => void choose("message", choice)}
         />
+        <CategoryButton
+          icon={<Symbol>volume_off</Symbol>}
+          action={<Checkbox checked={!!person()?.muteSoundboard} />}
+          onClick={() => void toggleSoundboard()}
+          description="Don't play their soundboard clips (you still hear their voice)"
+        >
+          Mute their soundboard
+        </CategoryButton>
       </CategoryButton.Group>
       <Show when={error()}>
         <Text class="label">{error()}</Text>

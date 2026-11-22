@@ -47,6 +47,8 @@ export type FerretPersonSounds = {
   /** null = the normal ringtone / message sound */
   ringtone: FerretSoundChoice | null;
   message: FerretSoundChoice | null;
+  /** Don't play this person's soundboard clips */
+  muteSoundboard?: boolean;
 };
 
 export type PttBinding = { kind: "key" | "mouse"; code: number; label: string };
@@ -63,8 +65,12 @@ export type FerretVoiceSettings = {
   /** Electron accelerators like "Ctrl+Shift+M" */
   muteHotkey: string | null;
   deafenHotkey: string | null;
-  /** 0-100 */
+  /** 0-100, your own clips */
   soundboardVolume: number;
+  /** Play other people's soundboard clips */
+  hearSoundboards: boolean;
+  /** 0-100, other people's clips */
+  othersSoundboardVolume: number;
   /** Small always-on-top window while in a call and Ferret isn't focused */
   compactCallWindow: boolean;
 };
@@ -116,6 +122,7 @@ export type FerretSettingsPatch = {
       name?: string;
       ringtone?: { choice: string } | null;
       message?: { choice: string } | null;
+      muteSoundboard?: boolean;
     } | null
   >;
   voice?: Partial<Omit<FerretVoiceSettings, "pttBinding">> & {

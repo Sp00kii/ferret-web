@@ -14,12 +14,8 @@ import {
 import type { FerretSettings, FerretVoiceSettings } from "../bridge";
 import { applyFerretSettings, updateFerretSettings } from "../settings";
 
-import {
-  MAX_CLIP_SECONDS,
-  canPlayIntoCall,
-  micLevel,
-  transmitting,
-} from "./micChain";
+import { canPlayIntoCall, micLevel, transmitting } from "./micChain";
+import { previewClip, setPlayingVolume } from "./soundboard";
 
 const voicePatch = (
   patch: Parameters<typeof updateFerretSettings>[0]["voice"],
@@ -62,17 +58,41 @@ export function SoundboardSettings(props: {
 }) {
   return (
     <>
-      <Text class="label">Soundboard volume</Text>
+      <Text class="label">Volume of your clips (for everyone)</Text>
       <Slider
         min={0}
         max={100}
         step={5}
         value={props.voice.soundboardVolume}
+        onInput={(event) => setPlayingVolume(event.currentTarget.value)}
         onChange={(event) =>
           voicePatch({ soundboardVolume: event.currentTarget.value })
         }
         labelFormatter={(value) => `${value}%`}
       />
+      <CategoryButton
+        action={<Checkbox checked={props.voice.hearSoundboards} />}
+        onClick={() =>
+          voicePatch({ hearSoundboards: !props.voice.hearSoundboards })
+        }
+        icon={<Symbol>campaign</Symbol>}
+        description="Play other people's soundboard clips. Works for clips sent from Ferret 1.0.7 or newer; mute single people on their profile (Ferret sounds)."
+      >
+        Hear other people's soundboards
+      </CategoryButton>
+      <Show when={props.voice.hearSoundboards}>
+        <Text class="label">Volume of other people's clips (just for you)</Text>
+        <Slider
+          min={0}
+          max={100}
+          step={5}
+          value={props.voice.othersSoundboardVolume}
+          onChange={(event) =>
+            voicePatch({ othersSoundboardVolume: event.currentTarget.value })
+          }
+          labelFormatter={(value) => `${value}%`}
+        />
+      </Show>
       <MySounds clips={props.soundboard} />
     </>
   );
@@ -317,18 +337,16 @@ function MySounds(props: { clips: FerretSettings["soundboard"] }) {
 
   const play = (id: string) => {
     preview?.pause();
-    preview = new Audio(`/__ferret/soundboard/${id}`);
+    preview = previewClip(new Audio(`/__ferret/soundboard/${id}`));
     void preview.play().catch(() => setError("Couldn't play this file."));
-    const current = preview;
-    setTimeout(() => current.pause(), MAX_CLIP_SECONDS * 1000);
   };
   onCleanup(() => preview?.pause());
 
   return (
     <>
       <Text class="label">
-        Your soundboard sounds (up to 24, max 10 MB each; only the first{" "}
-        {MAX_CLIP_SECONDS} seconds play)
+        Your soundboard sounds (up to 24, max 10 MB each). They play in full;
+        press Stop in the soundboard to end one early.
       </Text>
       <For each={props.clips}>
         {(clip) => (

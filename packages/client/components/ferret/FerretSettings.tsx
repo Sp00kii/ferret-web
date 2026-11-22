@@ -44,6 +44,7 @@ import {
 } from "./settings";
 import { type FerretTab, ferretTab, setFerretTab } from "./settingsTab";
 import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
+import { trackAudio } from "./stopSounds";
 import { IconPicker } from "./theme/IconPicker";
 import { LookPicker } from "./theme/LookPicker";
 import { MicTest } from "./voice/MicTest";
@@ -391,6 +392,7 @@ function RingtonePicker(props: { ringtone: FerretSettingsType["ringtone"] }) {
       ringtone.preset === "custom" ? `${src}&t=${Date.now()}` : src,
     );
     preview.volume = ringtone.volume / 100;
+    trackAudio(preview);
     void preview.play().catch(() => setError("Couldn't play this sound file."));
     previewTimer = setTimeout(stopPreview, 5000);
   };
@@ -464,10 +466,12 @@ function RingtonePicker(props: { ringtone: FerretSettingsType["ringtone"] }) {
 }
 
 let soundPreview: HTMLAudioElement | undefined;
+const PREVIEW_SECONDS = 10;
 
 function previewSound(src: string) {
   soundPreview?.pause();
-  soundPreview = new Audio(src);
+  // long custom files stop after a while (or with the Stop button)
+  soundPreview = trackAudio(new Audio(src), PREVIEW_SECONDS);
   void soundPreview.play().catch(() => {});
 }
 

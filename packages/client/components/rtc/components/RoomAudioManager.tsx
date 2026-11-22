@@ -5,6 +5,10 @@ import { getTrackReferenceId, isLocal } from "@livekit/components-core";
 import { Key } from "@solid-primitives/keyed";
 import { RemoteTrackPublication, Track } from "livekit-client";
 
+import {
+  incomingSoundboard,
+  isSoundboardTrack,
+} from "@revolt/ferret/voice/soundboard"; // Ferret mod
 import { useState } from "@revolt/state";
 
 import { useVoice } from "../state";
@@ -45,24 +49,38 @@ export function RoomAudioManager() {
   return (
     <div style={{ display: "none" }}>
       <Key each={filteredTracks()} by={(item) => getTrackReferenceId(item)}>
-        {(track) => (
-          <AudioTrack
-            trackRef={track()}
-            volume={
-              state.voice.outputVolume *
-              (track().source === Track.Source.ScreenShareAudio
-                ? state.voice.getScreenShareVolume(track().participant.identity)
-                : state.voice.getUserVolume(track().participant.identity))
-            }
-            muted={
-              (track().source === Track.Source.ScreenShareAudio
-                ? state.voice.getScreenShareMuted(track().participant.identity)
-                : state.voice.getUserMuted(track().participant.identity)) ||
-              voice.deafen()
-            }
-            enableBoosting
-          />
-        )}
+        {(track) => {
+          // Ferret mod: soundboard clips sent by Ferret on their own track
+          // follow your soundboard settings (volume, off, per person)
+          const board = () =>
+            isSoundboardTrack(track().publication)
+              ? incomingSoundboard(track().participant.identity)
+              : undefined;
+          return (
+            <AudioTrack
+              trackRef={track()}
+              volume={
+                state.voice.outputVolume *
+                (track().source === Track.Source.ScreenShareAudio
+                  ? state.voice.getScreenShareVolume(
+                      track().participant.identity,
+                    )
+                  : state.voice.getUserVolume(track().participant.identity)) *
+                (board()?.volume ?? 1)
+              }
+              muted={
+                (track().source === Track.Source.ScreenShareAudio
+                  ? state.voice.getScreenShareMuted(
+                      track().participant.identity,
+                    )
+                  : state.voice.getUserMuted(track().participant.identity)) ||
+                voice.deafen() ||
+                !!board()?.muted
+              }
+              enableBoosting
+            />
+          );
+        }}
       </Key>
     </div>
   );

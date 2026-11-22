@@ -138,12 +138,10 @@ export function attachMicChain(context: AudioContext, source: AudioNode) {
 /** Whether there's a live mic stage to play soundboard clips into */
 export const canPlayIntoCall = () => chains.size > 0;
 
-/** Long uploads get cut off so nobody can blast a whole song */
-export const MAX_CLIP_SECONDS = 15;
-
 const decoded = new WeakMap<AudioContext, Map<string, Promise<AudioBuffer>>>();
 
-function decode(context: AudioContext, src: string) {
+/** Decode a clip for this audio context (cached per context) */
+export function decode(context: AudioContext, src: string) {
   let cache = decoded.get(context);
   if (!cache) decoded.set(context, (cache = new Map()));
   let buffer = cache.get(src);
@@ -157,22 +155,58 @@ function decode(context: AudioContext, src: string) {
   return buffer;
 }
 
+/** A clip that's playing: stop it, or change its volume while it plays */
+export type Playback = {
+  stop: () => void;
+  setVolume: (volume: number) => void;
+};
+
 /**
- * Play a clip into the call (skips the gate, so push-to-talk doesn't need
- * to be held). Returns false if not in a call.
+ * Play a whole clip into `destination` (no time limit: you can stop it, and
+ * listeners can turn soundboards down or off).
  */
-export async function playIntoCall(src: string, volume: number) {
-  const played = [...chains].map(async (chain) => {
-    const buffer = await decode(chain.context, src);
-    const node = chain.context.createBufferSource();
-    const gain = chain.context.createGain();
-    gain.gain.value = volume;
-    node.buffer = buffer;
-    node.connect(gain).connect(chain.mix);
-    node.onended = () => gain.disconnect();
-    node.start();
-    node.stop(chain.context.currentTime + MAX_CLIP_SECONDS);
-  });
-  await Promise.all(played);
-  return played.length > 0;
+export async function playClip(
+  context: AudioContext,
+  destination: AudioNode,
+  src: string,
+  volume: number,
+): Promise<Playback> {
+  const buffer = await decode(context, src);
+  const node = context.createBufferSource();
+  const gain = context.createGain();
+  gain.gain.value = volume;
+  node.buffer = buffer;
+  node.connect(gain).connect(destination);
+  node.onended = () => gain.disconnect();
+  node.start();
+  return {
+    stop() {
+      try {
+        node.stop();
+      } catch {
+        // already stopped
+      }
+    },
+    setVolume(next) {
+      gain.gain.setTargetAtTime(next, context.currentTime, 0.02);
+    },
+  };
+}
+
+/**
+ * Play a clip mixed into your own mic (skips the gate, so push-to-talk
+ * doesn't need to be held). Returns undefined if not in a call.
+ */
+export async function playIntoCall(
+  src: string,
+  volume: number,
+): Promise<Playback | undefined> {
+  const playing = await Promise.all(
+    [...chains].map((chain) => playClip(chain.context, chain.mix, src, volume)),
+  );
+  if (!playing.length) return undefined;
+  return {
+    stop: () => playing.forEach((clip) => clip.stop()),
+    setVolume: (next) => playing.forEach((clip) => clip.setVolume(next)),
+  };
 }

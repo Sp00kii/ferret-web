@@ -7,6 +7,31 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.7",
+    items: [
+      {
+        icon: "🔇",
+        title: "Control other people's soundboards",
+        text: "Turn other people's soundboard clips down or off, or mute one person's soundboard from their profile. Works for clips sent from Ferret 1.0.7 or newer.",
+      },
+      {
+        icon: "⏹️",
+        title: "Stop sounds",
+        text: "A Stop button for your soundboard clip, and a Stop sound button for any longer sound. The volume slider now works while a clip plays.",
+      },
+      {
+        icon: "♾️",
+        title: "No soundboard time limit",
+        text: "Your own soundboard sounds play in full instead of being cut off after 15 seconds.",
+      },
+      {
+        icon: "🎧",
+        title: "Clips on your headset",
+        text: "You hear your own soundboard clips on the same speakers or headset as the call. Long custom alert sounds stop after 5 seconds.",
+      },
+    ],
+  },
+  {
     version: "1.0.6",
     items: [
       {

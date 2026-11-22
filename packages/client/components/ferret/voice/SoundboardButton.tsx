@@ -4,6 +4,7 @@ import { Portal } from "solid-js/web";
 import { styled } from "styled-system/jsx";
 
 import { useVoice } from "@revolt/rtc";
+import { useState } from "@revolt/state";
 import { IconButton, Slider } from "@revolt/ui/components/design";
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
@@ -15,9 +16,12 @@ import {
 
 import {
   SOUNDBOARD,
+  clipPlaying,
   coolingDown,
   customClips,
   playSoundboard,
+  setPlayingVolume,
+  stopSoundboard,
 } from "./soundboard";
 
 /**
@@ -28,6 +32,7 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
   if (!window.ferret) return null;
 
   const voice = useVoice();
+  const state = useState();
   const [open, setOpen] = createSignal(false);
   // where the panel goes: above the button, kept inside the window
   const [spot, setSpot] = createSignal({ left: 0, bottom: 0 });
@@ -71,6 +76,7 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
   const muted = () => !voice.microphone();
   const settings = useFerretSettings();
   const volume = () => settings()?.voice.soundboardVolume ?? 60;
+  const othersVolume = () => settings()?.voice.othersSoundboardVolume ?? 100;
   const [error, setError] = createSignal<string>();
 
   const addClip = async () => {
@@ -89,7 +95,13 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
       type="button"
       title={clip.name}
       disabled={coolingDown()}
-      onClick={() => void playSoundboard(clip.src)}
+      onClick={() =>
+        void playSoundboard(
+          clip.src,
+          voice.room(),
+          state.voice.preferredAudioOutputDevice,
+        )
+      }
     >
       <span>{clip.emoji}</span>
       {clip.name}
@@ -123,6 +135,11 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
               <Show when={muted()}>
                 <small>Unmute so others can hear it</small>
               </Show>
+              <Show when={clipPlaying()}>
+                <StopButton type="button" onClick={stopSoundboard}>
+                  <Symbol size={16}>stop</Symbol> Stop
+                </StopButton>
+              </Show>
             </Heading>
             <Grid>
               <For each={SOUNDBOARD}>{clipButton}</For>
@@ -138,16 +155,34 @@ export function SoundboardButton(props: { size: "xs" | "sm" }) {
                 Add sound
               </Clip>
             </Grid>
-            <VolumeRow>
-              <Symbol size={18}>volume_up</Symbol>
+            <VolumeRow title="Volume of your clips, for everyone">
+              <span>Yours</span>
               <Slider
                 min={0}
                 max={100}
                 step={5}
                 value={volume()}
+                onInput={(event) => setPlayingVolume(event.currentTarget.value)}
                 onChange={(event) =>
                   void updateFerretSettings({
                     voice: { soundboardVolume: event.currentTarget.value },
+                  })
+                }
+                labelFormatter={(value) => `${value}%`}
+              />
+            </VolumeRow>
+            <VolumeRow title="Volume of other people's clips, just for you">
+              <span>Others</span>
+              <Slider
+                min={0}
+                max={100}
+                step={5}
+                value={othersVolume()}
+                onChange={(event) =>
+                  void updateFerretSettings({
+                    voice: {
+                      othersSoundboardVolume: event.currentTarget.value,
+                    },
                   })
                 }
                 labelFormatter={(value) => `${value}%`}
@@ -234,15 +269,34 @@ const Clip = styled("button", {
   },
 });
 
-/** Volume for everyone in the call (and you), same as in settings */
+/** Your clips' volume and other people's, same as in settings */
 const VolumeRow = styled("div", {
   base: {
     display: "flex",
     alignItems: "center",
     gap: "4px",
-    paddingTop: "8px",
+    paddingTop: "4px",
     paddingInline: "4px",
+    fontSize: "12px",
+    "& span": { width: "44px", flexShrink: 0 },
     "& mdui-slider": { flexGrow: 1 },
+  },
+});
+
+const StopButton = styled("button", {
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: "2px",
+    marginInlineStart: "auto",
+    padding: "2px 10px",
+    border: "none",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontSize: "12px",
+    fontWeight: 600,
+    color: "var(--md-sys-color-on-error-container)",
+    background: "var(--md-sys-color-error-container)",
   },
 });
 

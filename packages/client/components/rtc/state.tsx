@@ -39,6 +39,7 @@ import { VoiceCallCardContext } from "@revolt/ui/components/features/voice/callC
 
 import { Device, useDevice } from "@revolt/common";
 import { followPreferredDevices } from "@revolt/ferret/voice/devices"; // Ferret mod
+import { isSoundboardTrack } from "@revolt/ferret/voice/soundboard"; // Ferret mod
 import { InRoom } from "./components/InRoom";
 import { RoomAudioManager } from "./components/RoomAudioManager";
 import { VoiceProcessor } from "./VoiceProcessor";
@@ -301,7 +302,11 @@ class Voice {
     followPreferredDevices(room, this.#settings);
 
     room.addListener("localTrackPublished", (pub) => {
-      if (pub.audioTrack && pub.audioTrack.source === Track.Source.Microphone) {
+      if (
+        pub.audioTrack &&
+        pub.audioTrack.source === Track.Source.Microphone &&
+        !isSoundboardTrack(pub) // Ferret mod: not the soundboard track
+      ) {
         if (!pub.audioTrack.getProcessor()) {
           pub.audioTrack?.setProcessor(
             (this.voiceProcessor = new VoiceProcessor(this.#settings)),

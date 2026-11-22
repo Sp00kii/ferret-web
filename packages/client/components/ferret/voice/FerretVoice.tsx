@@ -6,6 +6,7 @@ import { useVoice } from "@revolt/rtc";
 import type { MiniCallState } from "../bridge";
 import { popupLook } from "../notifications/toasts";
 import { useFerretSettings } from "../settings";
+import { StopSoundsButton } from "../StopSoundsButton";
 
 import { setMicChainConfig, setPushToTalkHeld } from "./micChain";
 
@@ -14,7 +15,8 @@ const MINI_UPDATE_MS = 400;
 /**
  * Glue between the desktop app and the call: feeds push-to-talk / noise
  * gate settings into the mic stage, runs the global mute / deafen hotkeys,
- * and keeps the compact call window up to date. Renders nothing.
+ * and keeps the compact call window up to date. Shows the Stop sound
+ * button while a longer Ferret sound plays.
  */
 export function FerretVoice() {
   const bridge = window.ferret;
@@ -106,5 +108,5 @@ export function FerretVoice() {
     bridge.mini.update({ inCall: false, callId: "" });
   });
 
-  return null;
+  return <StopSoundsButton />;
 }

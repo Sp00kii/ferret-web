@@ -62,8 +62,8 @@ export function PeopleSounds(props: { settings: FerretSettings }) {
       </Text>
       <Text class="label">
         Give someone their own ringtone or message sound, so you know who it is
-        without looking. You can also right-click anyone and pick "Ferret
-        sounds…".
+        without looking, or mute their soundboard. You can also right-click
+        anyone and pick "Ferret sounds…".
       </Text>
 
       <For each={people()}>
