@@ -12,6 +12,7 @@ import {
   UserSystemMessage,
 } from "stoat.js";
 
+import { showFerretToast } from "@revolt/ferret/notifications/toasts"; // Ferret mod
 import { useNavigate, useSmartParams } from "@revolt/routing";
 import { useState } from "@revolt/state";
 
@@ -202,6 +203,9 @@ export function NotificationsWorker() {
 
     // Ferret mod: pass the author for per-person message sounds
     sound.playSound("message", false, message.authorId);
+
+    // Ferret mod: Ferret's own pop-up with a reply box (desktop app)
+    if (showFerretToast(message, body)) return;
 
     const notification = new Notification(title!, {
       icon,

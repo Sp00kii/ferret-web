@@ -73,6 +73,15 @@ export function FerretSettings() {
                 title="Ferret style"
                 description="Ferret's navy and copper look. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
               />
+              <Toggle
+                icon="chat_bubble"
+                checked={config().notificationPopups}
+                onToggle={(notificationPopups) =>
+                  updateFerretSettings({ notificationPopups })
+                }
+                title="Ferret notification pop-ups"
+                description="Show new messages in a Ferret pop-up in the corner where you can reply straight away. Turn off to use normal Windows notifications. Which messages notify is still set in Settings → Notifications."
+              />
             </CategoryButton.Group>
           </Section>
 

@@ -18,6 +18,8 @@ export type FerretSettings = {
   showConnectionQuality: boolean;
   /** Ferret's navy/copper look; off = stock Stoat theming */
   ferretStyle: boolean;
+  /** Ferret pop-ups with a reply box instead of Windows notifications */
+  notificationPopups: boolean;
   /** Per-sound choices; missing slots use Ferret's own sound */
   sounds: Partial<Record<string, FerretSoundChoice>>;
   voice: FerretVoiceSettings;
@@ -85,6 +87,7 @@ export type FerretSettingsPatch = {
   watchedVoiceChannels?: string[];
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
+  notificationPopups?: boolean;
   sounds?: Partial<Record<string, { choice: string }>>;
   /** null removes the person; a null sound goes back to the normal one */
   people?: Record<
@@ -156,6 +159,33 @@ export interface FerretBridge {
   onHotkey(
     callback: (action: "toggleMute" | "toggleDeafen") => void,
   ): () => void;
+
+  toast: {
+    show(toast: {
+      id: string;
+      title: string;
+      subtitle?: string;
+      body: string;
+      icon?: string;
+      channelId: string;
+      messageId?: string;
+      canReply: boolean;
+    }): void;
+    onAction(
+      callback: (
+        action:
+          | { type: "open"; channelId: string; messageId?: string }
+          | {
+              type: "reply";
+              id: string;
+              channelId: string;
+              messageId?: string;
+              text: string;
+            },
+      ) => void,
+    ): () => void;
+    replyResult(result: { id: string; ok: boolean; error?: string }): void;
+  };
 
   mini: {
     update(state: MiniCallState): void;
