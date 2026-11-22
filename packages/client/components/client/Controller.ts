@@ -11,6 +11,9 @@ import type { State as ApplicationState } from "@revolt/state";
 import type { Session } from "@revolt/state/stores/Auth";
 import { useSnackbar } from "@revolt/ui";
 
+// Ferret mod: diagnostics log
+import { logDiagnostic } from "@revolt/ferret/diagnostics/recorder";
+
 import Instance from "../instance/Instance";
 import { killServiceWorkerSubscription } from "./NotificationsController";
 
@@ -136,6 +139,7 @@ class Lifecycle {
    * the remaining back-off / leave the Offline state.
    */
   resync(reason: string) {
+    logDiagnostic("resync", reason);
     if (!navigator.onLine) return;
 
     switch (this.state()) {

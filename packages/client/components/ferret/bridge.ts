@@ -145,6 +145,9 @@ export interface FerretBridge {
 
   checkForUpdates(): Promise<UpdateCheckResult>;
 
+  /** App facts for the diagnostics panel (no paths or account info) */
+  diagnostics(): Promise<Record<string, string | number> | null>;
+
   /** Waits (max 10 s) for a key or side mouse button; Escape cancels */
   capturePttBinding(): Promise<FerretSettings | null>;
   /** Whether the mute / deafen hotkeys could be registered */

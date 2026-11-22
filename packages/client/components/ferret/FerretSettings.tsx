@@ -20,6 +20,10 @@ import type {
   FerretSettings as FerretSettingsType,
   UpdateCheckResult,
 } from "./bridge";
+import {
+  DiagnosticsSection,
+  tapToUnlockDiagnostics,
+} from "./diagnostics/DiagnosticsSection";
 import { FERRET_DONATE_URL } from "./links";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
@@ -48,7 +52,13 @@ export function FerretSettings() {
       {(config) => (
         <Column gap="lg">
           <Notice>
-            <img src={FERRET_LOGO} alt="" width={40} height={40} />
+            <img
+              src={FERRET_LOGO}
+              alt=""
+              width={40}
+              height={40}
+              onClick={tapToUnlockDiagnostics}
+            />
             <span>{window.ferret!.unofficialNotice}</span>
           </Notice>
 
@@ -134,6 +144,7 @@ export function FerretSettings() {
 
           <ConnectionSection />
           <UpdatesSection />
+          <DiagnosticsSection />
         </Column>
       )}
     </Show>
