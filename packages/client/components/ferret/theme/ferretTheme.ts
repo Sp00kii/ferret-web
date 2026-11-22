@@ -81,8 +81,8 @@ const triplet = (hex: string) => {
 };
 
 /**
- * CSS variables that turn the app into the Ferret style. Only keys the stock
- * theme also sets are overridden, so switching back restores Stoat exactly.
+ * CSS variables that turn the app into the Ferret style. LoadTheme removes
+ * any that disappear, so switching back restores Stoat exactly.
  */
 export function ferretThemeVariables(theme: SelectedTheme) {
   // light mode: a warm scheme generated from Ferret copper
@@ -110,5 +110,11 @@ export function ferretThemeVariables(theme: SelectedTheme) {
   for (const [key, value] of Object.entries(RADIUS)) {
     variables[`--borderRadius-${key}`] = value;
   }
+
+  // login screen panel: navy with a warm copper glow instead of Stoat purple
+  variables["--ferret-hero-bg"] =
+    "radial-gradient(120% 90% at 0% 100%, rgb(240 120 53 / 0.38) 0%, transparent 58%), linear-gradient(145deg, #1d2440 0%, #151b30 60%, #101426 100%)";
+  variables["--ferret-hero-accent"] = "#F07835";
+
   return variables;
 }

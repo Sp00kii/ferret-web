@@ -55,7 +55,7 @@ const Copy = styled("div", {
     },
 
     "& h2 span": {
-      color: "#08d3ef",
+      color: "var(--ferret-hero-accent, #08d3ef)", // Ferret mod
     },
 
     "& p": {

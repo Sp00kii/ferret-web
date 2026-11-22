@@ -17,6 +17,9 @@ import { styled } from "styled-system/jsx";
 
 import { useClient } from "@revolt/client";
 import { debounce, useDevice } from "@revolt/common";
+// Ferret mod
+import { cleanGifCategories } from "@revolt/ferret/gifs/categories";
+import { FavouriteStar } from "@revolt/ferret/gifs/FavouriteStar";
 import { useInstance } from "@revolt/instance";
 import { useState } from "@revolt/state";
 import {
@@ -403,7 +406,11 @@ function Categories(props: {
         ...(favourites.gifs().length > 0 ? [{ t: 2 }] : []),
         { t: 1 },
         ...(Array.isArray(trendingCategories.data)
-          ? trendingCategories.data.map((category) => ({ t: 0, category }))
+          ? // Ferret mod: drop id-named categories, add real ones
+            (window.ferret
+              ? cleanGifCategories(trendingCategories.data)
+              : trendingCategories.data
+            ).map((category) => ({ t: 0, category }))
           : []),
       ] as CategoryItem[],
   );
@@ -447,7 +454,10 @@ function Category(props: {
 }) {
   return (
     <CategoryBox
-      trending={props.item.t === 1}
+      // Ferret mod: image-less (curated) categories get the gradient too
+      trending={
+        props.item.t === 1 || (props.item.t === 0 && !props.item.category.image)
+      }
       role="listitem"
       tabIndex={0}
       style={
@@ -630,44 +640,46 @@ function GifLayout(props: {
     <Scroller>
       <Masonry role="list">
         <For each={props.data}>
-          {(gif) => (
-            <GifTile
-              role="listitem"
-              tabIndex={0}
-              onClick={() => onMessage(gif.url)}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-              }}
-            >
-              <Gif
-                gif={
-                  new WebsiteEmbed(client(), {
-                    original_url: gif.url,
-                    ...(gif.image
-                      ? {
-                          image: new ImageEmbed(client(), {
-                            url: gif.image,
-                            height: 0,
-                            width: 0,
-                            size: "Preview",
-                          }),
-                        }
-                      : {
-                          video: new VideoEmbed(client(), {
-                            url: gif.media_formats.tinywebm.url,
-                            height: 0,
-                            width: 0,
-                          }),
-                        }),
-                  })
-                }
-                preSized
-                noModal
-              />
-            </GifTile>
-          )}
+          {(gif) => {
+            const embed = new WebsiteEmbed(client(), {
+              original_url: gif.url,
+              ...(gif.image
+                ? {
+                    image: new ImageEmbed(client(), {
+                      url: gif.image,
+                      height: 0,
+                      width: 0,
+                      size: "Preview",
+                    }),
+                  }
+                : {
+                    video: new VideoEmbed(client(), {
+                      url: gif.media_formats.tinywebm.url,
+                      height: 0,
+                      width: 0,
+                    }),
+                  }),
+            });
+
+            return (
+              <GifTile
+                role="listitem"
+                tabIndex={0}
+                onClick={() => onMessage(gif.url)}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  e.stopImmediatePropagation();
+                }}
+              >
+                <Gif gif={embed} preSized noModal />
+                {/* Ferret mod: favourite straight from the picker */}
+                <Show when={window.ferret}>
+                  <FavouriteStar embed={embed} />
+                </Show>
+              </GifTile>
+            );
+          }}
         </For>
       </Masonry>
       <EndOfResults

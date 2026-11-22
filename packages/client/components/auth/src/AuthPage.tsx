@@ -82,8 +82,9 @@ const Hero = styled("section", {
     overflow: "hidden",
     padding: "clamp(32px, 4vw, 62px)",
     color: "#fff",
+    // Ferret mod: overridable by the Ferret style, Stoat's gradient otherwise
     background:
-      "linear-gradient(145deg, #33294b 0%, #262038 62%, #211b31 100%)",
+      "var(--ferret-hero-bg, linear-gradient(145deg, #33294b 0%, #262038 62%, #211b31 100%))",
     borderRadius: "clamp(28px, 3vw, 48px)",
 
     "@media (max-width: 980px)": {
