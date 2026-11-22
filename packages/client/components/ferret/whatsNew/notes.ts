@@ -44,6 +44,11 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
         title: "Themes, accents and app icons",
         text: "Midnight, Cream and High contrast themes, five accent colours and ten app icons, including albino and silver ferrets.",
       },
+      {
+        icon: "⚡",
+        title: "Handy extras",
+        text: "Ctrl+K to jump anywhere, unread count on the taskbar, a zoom slider, and GIFs that stay still until you hover them if you prefer.",
+      },
     ],
   },
 ];
