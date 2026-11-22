@@ -14,6 +14,11 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
         title: "Accessibility in one place",
         text: "Settings → Ferret → Appearance → Accessibility: zoom, text size, a readable font (incl. OpenDyslexic), underlined links, reduce motion, paused GIFs and high contrast.",
       },
+      {
+        icon: "🎮",
+        title: "Ferret in your Discord status",
+        text: "Turn on Settings → Desktop → Discord status and your Discord profile shows you're using Ferret.",
+      },
     ],
   },
   {

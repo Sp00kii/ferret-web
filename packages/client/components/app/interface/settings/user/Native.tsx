@@ -141,11 +141,14 @@ export default function Native() {
       </CategoryButton.Group>
 
       <CategoryButton.Group>
+        {/* Ferret mod: clearer name; the status shows Ferret */}
         {CheckboxButton(
           "discordRpc",
           "groups_2",
-          t`Discord RPC`,
-          t`Rep Stoat using Discord rich presence.`,
+          window.ferret ? "Discord status" : t`Discord RPC`,
+          window.ferret
+            ? "Show in your Discord profile that you're using Ferret."
+            : t`Rep Stoat using Discord rich presence.`,
         )}
         {CheckboxButton(
           "spellchecker",
