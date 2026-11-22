@@ -13,6 +13,7 @@ import { styled } from "styled-system/jsx";
 import { VoiceInputOptions } from "@revolt/app/interface/settings/user/voice/VoiceInputOptions";
 import { VoiceProcessingOptions } from "@revolt/app/interface/settings/user/voice/VoiceProcessingOptions";
 import { useClient, useClientLifecycle } from "@revolt/client";
+import { useState } from "@revolt/state";
 import {
   Button,
   CategoryButton,
@@ -22,6 +23,7 @@ import {
   Symbol,
   Text,
 } from "@revolt/ui";
+import type { Fonts } from "@revolt/ui/themes/fonts";
 
 import { ferretLogo } from "./Branding";
 import type {
@@ -33,7 +35,10 @@ import {
   tapToUnlockDiagnostics,
 } from "./diagnostics/DiagnosticsSection";
 import { FERRET_DONATE_URL } from "./links";
-import { pauseAnimationsActive } from "./motion/FerretMotion";
+import {
+  pauseAnimationsActive,
+  reduceMotionActive,
+} from "./motion/FerretMotion";
 import { FERRET_NOISES, FERRET_NOISE_NAMES, NOISES_ID } from "./noises";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
@@ -69,8 +74,31 @@ const setTab = setFerretTab;
  * "Ferret" page in user settings: everything the mod adds, split into tabs
  * so it isn't one endless page.
  */
+/** Fonts picked for readability (all already in Stoat's font list) */
+const READABLE_FONTS: [Fonts, string][] = [
+  ["Inter", "Inter (Stoat's default)"],
+  [
+    "Atkinson Hyperlegible",
+    "Atkinson Hyperlegible (letters easy to tell apart)",
+  ],
+  ["OpenDyslexic", "OpenDyslexic (made for dyslexia)"],
+  ["Lexend", "Lexend (easy reading)"],
+];
+
 export function FerretSettings() {
   const settings = useFerretSettings();
+  const stoatState = useState();
+
+  // the font is Stoat's own setting (also in Appearance); a font picked
+  // there that isn't one of these stays in the list
+  const fontOptions = () => {
+    const entries: Record<string, { title: string }> = {};
+    for (const [font, title] of READABLE_FONTS) entries[font] = { title };
+    const current = stoatState.theme.interfaceFont;
+    if (current && !entries[current])
+      entries[current] = { title: `${current} (your font)` };
+    return entries;
+  };
 
   return (
     <Show
@@ -132,8 +160,8 @@ export function FerretSettings() {
                 <IconPicker settings={config()} />
               </Section>
 
-              <Section title="Size and motion">
-                <Text class="label">Zoom</Text>
+              <Section title="Accessibility">
+                <Text class="label">Zoom (everything)</Text>
                 <Slider
                   min={50}
                   max={200}
@@ -148,7 +176,60 @@ export function FerretSettings() {
                   Ctrl + and Ctrl − (or Ctrl + mouse wheel) change it too; Ctrl
                   0 resets to 100%.
                 </Text>
+                <Text class="label">Message text size</Text>
+                <Slider
+                  min={12}
+                  max={24}
+                  value={stoatState.theme.messageSize}
+                  onInput={(event) =>
+                    (stoatState.theme.messageSize = event.currentTarget.value)
+                  }
+                  labelFormatter={(value) => `${value}px`}
+                />
                 <CategoryButton.Group>
+                  <CategoryButton.Select
+                    icon={<Symbol>text_fields</Symbol>}
+                    title="Font"
+                    value={stoatState.theme.interfaceFont as string}
+                    options={fontOptions()}
+                    onUpdate={(font) =>
+                      stoatState.theme.setInterfaceFont(font as Fonts)
+                    }
+                  />
+                  <Toggle
+                    icon="format_underlined"
+                    checked={config().underlineLinks}
+                    onToggle={(underlineLinks) =>
+                      updateFerretSettings({ underlineLinks })
+                    }
+                    title="Underline links"
+                    description="Links in messages are underlined, so you can tell them apart without relying on colour."
+                  />
+                  <Toggle
+                    icon="animation"
+                    checked={reduceMotionActive(config().reduceMotion)}
+                    onToggle={(reduceMotion) =>
+                      updateFerretSettings({ reduceMotion })
+                    }
+                    title="Reduce motion"
+                    description="Turns off sliding, fading and bouncing animations. Starts out following Windows' animation setting."
+                  />
+                  <Toggle
+                    icon="contrast"
+                    checked={
+                      config().ferretStyle &&
+                      config().ferretTheme === "contrast"
+                    }
+                    onToggle={(on) =>
+                      updateFerretSettings(
+                        on
+                          ? { ferretStyle: true, ferretTheme: "contrast" }
+                          : { ferretTheme: "midnight" },
+                      )
+                    }
+                    title="High contrast"
+                    description="Ferret's high contrast theme: stronger colours and clearer edges. Turning it off goes back to Midnight."
+                  />
                   <Toggle
                     icon="motion_photos_paused"
                     checked={pauseAnimationsActive(config().pauseAnimations)}
@@ -158,6 +239,11 @@ export function FerretSettings() {
                     title="Pause GIFs and animated emoji until hovered"
                     description="Animated pictures, emoji and avatars stay still until you point at them. Starts out following Windows' animation setting."
                   />
+                </CategoryButton.Group>
+              </Section>
+
+              <Section title="Links">
+                <CategoryButton.Group>
                   <Toggle
                     icon="link"
                     checked={config().linkPreviews}

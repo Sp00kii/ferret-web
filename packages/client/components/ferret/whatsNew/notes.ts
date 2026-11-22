@@ -7,6 +7,16 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.11",
+    items: [
+      {
+        icon: "♿",
+        title: "Accessibility in one place",
+        text: "Settings → Ferret → Appearance → Accessibility: zoom, text size, a readable font (incl. OpenDyslexic), underlined links, reduce motion, paused GIFs and high contrast.",
+      },
+    ],
+  },
+  {
     version: "1.0.10",
     items: [
       {

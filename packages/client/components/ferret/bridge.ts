@@ -29,6 +29,10 @@ export type FerretSettings = {
   notificationPopups: boolean;
   /** Ferret makes previews for links Stoat didn't preview */
   linkPreviews: boolean;
+  /** Underline links in messages */
+  underlineLinks: boolean;
+  /** Turn animations off; null = follow Windows */
+  reduceMotion: boolean | null;
   /** Alternative app icon (window + tray) */
   appIcon: string;
   /** Page zoom in percent (50-200) */
@@ -140,6 +144,8 @@ export type FerretSettingsPatch = {
   ferretStyle?: boolean;
   notificationPopups?: boolean;
   linkPreviews?: boolean;
+  underlineLinks?: boolean;
+  reduceMotion?: boolean | null;
   /** an empty string or null removes the nickname */
   nicknames?: Record<string, string | null>;
   /** the whole list at once */
