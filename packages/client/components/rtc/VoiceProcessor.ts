@@ -3,6 +3,8 @@ import { RNNoiseNode } from "livekit-rnnoise-processor";
 import { createEffect, createRoot, on } from "solid-js";
 
 import { CONFIGURATION } from "@revolt/common";
+// Ferret mod: push-to-talk, noise gate and soundboard stage
+import { attachMicChain } from "@revolt/ferret/voice/micChain";
 import { Voice } from "@revolt/state/stores/Voice";
 
 export class VoiceProcessor implements TrackProcessor<
@@ -21,6 +23,8 @@ export class VoiceProcessor implements TrackProcessor<
   private compressorNode?: DynamicsCompressorNode;
   private gainNode?: GainNode;
   private destinationNode?: MediaStreamAudioDestinationNode;
+  // Ferret mod
+  private ferretChain?: ReturnType<typeof attachMicChain>;
 
   private disposeSolidjsContext: () => void = () => {};
 
@@ -155,11 +159,20 @@ export class VoiceProcessor implements TrackProcessor<
 
     // Create the destination node, connect the gain node and send it off to livekit
     this.destinationNode = context.createMediaStreamDestination();
-    this.gainNode.connect(this.destinationNode);
+    // Ferret mod: route through Ferret's mic stage in the desktop app
+    if (window.ferret) {
+      this.ferretChain = attachMicChain(context, this.gainNode);
+      this.ferretChain.output.connect(this.destinationNode);
+    } else {
+      this.gainNode.connect(this.destinationNode);
+    }
     this.processedTrack = this.destinationNode.stream.getAudioTracks()[0];
   }
 
   private async teardown() {
+    // Ferret mod
+    this.ferretChain?.dispose();
+    this.ferretChain = undefined;
     this.sourceNode?.disconnect();
     this.highpassNode?.disconnect();
     this.noiseSuppressionNode?.disconnect();

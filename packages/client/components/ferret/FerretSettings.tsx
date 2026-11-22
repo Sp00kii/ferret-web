@@ -29,6 +29,7 @@ import {
 } from "./settings";
 import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
 import { MicTest } from "./voice/MicTest";
+import { VoiceExtrasSettings } from "./voice/VoiceExtrasSettings";
 
 /**
  * "Ferret" page in user settings: everything the mod adds, in one place.
@@ -111,6 +112,7 @@ export function FerretSettings() {
             <VoiceInputOptions />
             <MicTest />
             <VoiceProcessingOptions />
+            <VoiceExtrasSettings voice={config().voice} />
             <CategoryButton.Group>
               <Toggle
                 icon="network_check"

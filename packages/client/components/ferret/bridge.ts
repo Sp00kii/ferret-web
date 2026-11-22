@@ -20,6 +20,44 @@ export type FerretSettings = {
   ferretStyle: boolean;
   /** Per-sound choices; missing slots use Ferret's own sound */
   sounds: Partial<Record<string, FerretSoundChoice>>;
+  voice: FerretVoiceSettings;
+};
+
+export type PttBinding = { kind: "key" | "mouse"; code: number; label: string };
+
+export type FerretVoiceSettings = {
+  pushToTalk: boolean;
+  /** Captured by the desktop app; the page can only clear it */
+  pttBinding: PttBinding | null;
+  /** Keep the mic open this long after letting go (ms) */
+  pttReleaseMs: number;
+  noiseGate: boolean;
+  /** Mic level (dBFS) needed to open the gate, -90 to -10 */
+  noiseGateDb: number;
+  /** Electron accelerators like "Ctrl+Shift+M" */
+  muteHotkey: string | null;
+  deafenHotkey: string | null;
+  /** 0-100 */
+  soundboardVolume: number;
+  /** Small always-on-top window while in a call and Ferret isn't focused */
+  compactCallWindow: boolean;
+};
+
+export type MiniCallState = {
+  inCall: boolean;
+  callId: string;
+  channelName?: string;
+  serverName?: string;
+  startedAt?: number;
+  muted?: boolean;
+  deafened?: boolean;
+  participants?: {
+    name: string;
+    avatar?: string;
+    speaking?: boolean;
+    muted?: boolean;
+    deafened?: boolean;
+  }[];
 };
 
 export type FerretSoundChoice = {
@@ -37,6 +75,9 @@ export type FerretSettingsPatch = {
   showConnectionQuality?: boolean;
   ferretStyle?: boolean;
   sounds?: Partial<Record<string, { choice: string }>>;
+  voice?: Partial<Omit<FerretVoiceSettings, "pttBinding">> & {
+    pttBinding?: null;
+  };
 };
 
 export type UpdateCheckResult =
@@ -74,6 +115,25 @@ export interface FerretBridge {
   onResync(callback: (reason: string) => void): () => void;
 
   checkForUpdates(): Promise<UpdateCheckResult>;
+
+  /** Waits (max 10 s) for a key or side mouse button; Escape cancels */
+  capturePttBinding(): Promise<FerretSettings | null>;
+  /** Whether the mute / deafen hotkeys could be registered */
+  hotkeyStatus(): Promise<{ mute: boolean; deafen: boolean } | null>;
+  onPushToTalk(callback: (held: boolean) => void): () => void;
+  onHotkey(
+    callback: (action: "toggleMute" | "toggleDeafen") => void,
+  ): () => void;
+
+  mini: {
+    update(state: MiniCallState): void;
+    onCommand(
+      callback: (command: "toggleMute" | "toggleDeafen" | "disconnect") => void,
+    ): () => void;
+    onRender(callback: (state: MiniCallState) => void): () => void;
+    command(command: string): void;
+    resize(height: number): void;
+  };
 }
 
 declare global {

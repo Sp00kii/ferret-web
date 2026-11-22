@@ -4,6 +4,7 @@ import { Show } from "solid-js";
 import { useLingui } from "@lingui/solid/macro";
 import { styled } from "styled-system/jsx";
 
+import { SoundboardButton } from "@revolt/ferret"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 import { useVoice } from "@revolt/rtc";
 import { useState } from "@revolt/state";
@@ -140,6 +141,8 @@ export function VoiceCallCardActions(props: { size: "xs" | "sm" }) {
           <Symbol>screen_share</Symbol>
         </Show>
       </IconButton>
+      {/* Ferret mod: soundboard (desktop app only) */}
+      <SoundboardButton size={props.size} />
       <Button
         size={props.size}
         variant="_error"
