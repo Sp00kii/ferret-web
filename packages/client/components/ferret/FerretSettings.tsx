@@ -25,6 +25,7 @@ import {
   tapToUnlockDiagnostics,
 } from "./diagnostics/DiagnosticsSection";
 import { FERRET_DONATE_URL } from "./links";
+import { pauseAnimationsActive } from "./motion/FerretMotion";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
 import {
@@ -90,6 +91,36 @@ export function FerretSettings() {
               <LookPicker settings={config()} />
             </Show>
             <IconPicker settings={config()} />
+
+            <Text class="label">Zoom</Text>
+            <Slider
+              min={50}
+              max={200}
+              step={5}
+              value={config().zoom}
+              onChange={(event) =>
+                updateFerretSettings({ zoom: event.currentTarget.value })
+              }
+              labelFormatter={(value) => `${value}%`}
+            />
+            <Text class="label">
+              Ctrl + and Ctrl − (or Ctrl + mouse wheel) change it too; Ctrl 0
+              resets to 100%.
+            </Text>
+            <CategoryButton.Group>
+              <Toggle
+                icon="motion_photos_paused"
+                checked={pauseAnimationsActive(config().pauseAnimations)}
+                onToggle={(pauseAnimations) =>
+                  updateFerretSettings({ pauseAnimations })
+                }
+                title="Pause GIFs and animated emoji until hovered"
+                description="Animated pictures, emoji and avatars stay still until you point at them. Starts out following Windows' animation setting."
+              />
+            </CategoryButton.Group>
+            <Text class="label">
+              Press Ctrl+K anywhere to jump to a friend, channel or server.
+            </Text>
           </Section>
 
           <Section title="Incoming calls">

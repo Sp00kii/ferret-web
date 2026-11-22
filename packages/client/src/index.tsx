@@ -24,10 +24,13 @@ import FlowVerify from "@revolt/auth/src/flows/FlowVerify";
 import { ClientContext, SoundContext, useClient } from "@revolt/client";
 import { DeviceContext } from "@revolt/common";
 import {
+  FerretBadge,
   FerretDiagnostics,
+  FerretMotion,
   FerretToastActions,
   FerretVoice,
   IncomingCalls,
+  QuickSwitcher,
   WhatsNew,
 } from "@revolt/ferret"; // Ferret mod
 import { I18nProvider } from "@revolt/i18n";
@@ -137,12 +140,15 @@ function MountContext(props: { children?: JSX.Element }) {
                   <ModalRenderer />
                   <FloatingManager />
                   <AndroidNag />
-                  {/* Ferret mod: incoming calls, voice extras, diagnostics, pop-ups */}
+                  {/* Ferret mod: calls, voice extras, diagnostics, pop-ups, badge, … */}
                   <IncomingCalls />
                   <FerretVoice />
                   <FerretDiagnostics />
                   <FerretToastActions />
                   <WhatsNew />
+                  <FerretBadge />
+                  <FerretMotion />
+                  <QuickSwitcher />
                 </QueryClientProvider>
               </VoiceContext>
             </SoundContext>

@@ -27,6 +27,10 @@ export type FerretSettings = {
   notificationPopups: boolean;
   /** Alternative app icon (window + tray) */
   appIcon: string;
+  /** Page zoom in percent (50-200) */
+  zoom: number;
+  /** Still GIFs / animated emoji until hovered; null = follow the system */
+  pauseAnimations: boolean | null;
   /** Per-sound choices; missing slots use Ferret's own sound */
   sounds: Partial<Record<string, FerretSoundChoice>>;
   voice: FerretVoiceSettings;
@@ -97,6 +101,8 @@ export type FerretSettingsPatch = {
   ferretStyle?: boolean;
   notificationPopups?: boolean;
   appIcon?: string;
+  zoom?: number;
+  pauseAnimations?: boolean | null;
   ferretTheme?: FerretThemeName;
   ferretAccent?: FerretAccentName;
   sounds?: Partial<Record<string, { choice: string }>>;
