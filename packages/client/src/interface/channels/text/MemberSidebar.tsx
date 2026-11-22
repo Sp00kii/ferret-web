@@ -8,6 +8,7 @@ import { styled } from "styled-system/jsx";
 import { floatingUserMenus } from "@revolt/app/menus/UserContextMenu";
 import { useClient } from "@revolt/client";
 import { createIsTimedOut } from "@revolt/common/lib/createIsTimedOut";
+import { useServerPresenceRefresh } from "@revolt/ferret/presence"; // Ferret mod
 import { TextWithEmoji } from "@revolt/markdown";
 import { userInformation } from "@revolt/markdown/users";
 import {
@@ -68,6 +69,11 @@ export function MemberSidebar(props: Props) {
  */
 export function ServerMemberSidebar(props: Props) {
   const client = useClient();
+
+  // Ferret mod: keep online/offline correct without needing F5
+  useServerPresenceRefresh(() =>
+    props.isLargeServer ? undefined : props.channel.server,
+  );
 
   type MemberRoleElement =
     | { t: 0; name: string; count: number; icon?: string | null }
