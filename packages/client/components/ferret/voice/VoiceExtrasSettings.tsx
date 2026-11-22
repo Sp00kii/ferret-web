@@ -44,16 +44,24 @@ function toAccelerator(event: KeyboardEvent) {
   return [...parts, key].join("+");
 }
 
-export function VoiceExtrasSettings(props: {
-  voice: FerretVoiceSettings;
-  soundboard: FerretSettings["soundboard"];
-}) {
+/** Push to talk, mic sensitivity and global mute / deafen shortcuts */
+export function TalkSettings(props: { voice: FerretVoiceSettings }) {
   return (
     <>
       <PushToTalk voice={props.voice} />
       <NoiseGate voice={props.voice} />
       <Hotkeys voice={props.voice} />
+    </>
+  );
+}
 
+/** Soundboard volume and the user's own clips */
+export function SoundboardSettings(props: {
+  voice: FerretVoiceSettings;
+  soundboard: FerretSettings["soundboard"];
+}) {
+  return (
+    <>
       <Text class="label">Soundboard volume</Text>
       <Slider
         min={0}
@@ -66,20 +74,23 @@ export function VoiceExtrasSettings(props: {
         labelFormatter={(value) => `${value}%`}
       />
       <MySounds clips={props.soundboard} />
-
-      <CategoryButton.Group>
-        <CategoryButton
-          action={<Checkbox checked={props.voice.compactCallWindow} />}
-          onClick={() =>
-            voicePatch({ compactCallWindow: !props.voice.compactCallWindow })
-          }
-          icon={<Symbol>picture_in_picture_alt</Symbol>}
-          description="While you're in a call and Ferret isn't focused, show a small always-on-top window with who's talking and mute / deafen / hang up. Drag it anywhere, or close it for the current call."
-        >
-          Compact call window
-        </CategoryButton>
-      </CategoryButton.Group>
     </>
+  );
+}
+
+/** The small always-on-top window while in a call */
+export function CompactWindowToggle(props: { voice: FerretVoiceSettings }) {
+  return (
+    <CategoryButton
+      action={<Checkbox checked={props.voice.compactCallWindow} />}
+      onClick={() =>
+        voicePatch({ compactCallWindow: !props.voice.compactCallWindow })
+      }
+      icon={<Symbol>picture_in_picture_alt</Symbol>}
+      description="While you're in a call and Ferret isn't focused, show a small always-on-top window with who's talking and mute / deafen / hang up. Drag it anywhere, or close it for the current call."
+    >
+      Compact call window
+    </CategoryButton>
   );
 }
 

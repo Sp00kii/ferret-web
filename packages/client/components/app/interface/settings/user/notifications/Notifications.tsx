@@ -1,4 +1,5 @@
 import { Trans } from "@lingui/solid/macro";
+import { FerretSettingsLink } from "@revolt/ferret/FerretSettingsLink"; // Ferret mod
 import { Show } from "solid-js";
 
 import { useNotifications } from "@revolt/client";
@@ -18,6 +19,12 @@ export default function Notifications(props: { isDesktop: boolean }) {
 
   return (
     <Column gap="lg">
+      {/* Ferret mod */}
+      <FerretSettingsLink
+        tab="sounds"
+        title="Ferret sounds and pop-ups"
+        description="Reply from notification pop-ups, pick a sound for every event, and give friends their own ringtone or message sound."
+      />
       <Column>
         <CategoryButton.Group>
           <Show when={settings.desktopNotificationsState !== "unsupported"}>

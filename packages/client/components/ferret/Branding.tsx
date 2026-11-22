@@ -2,7 +2,19 @@ import { styled } from "styled-system/jsx";
 
 import logo from "./assets/ferret-logo.png";
 
+import { useFerretSettings } from "./settings";
+
 export const FERRET_LOGO = logo;
+
+const settings = useFerretSettings();
+
+/** The logo in the chosen app icon colour (Settings -> Ferret -> App icon) */
+export function ferretLogo() {
+  const id = settings()?.appIcon;
+  return id && id !== "classic"
+    ? `${import.meta.env.BASE_URL}ferret/icons/${id}.png`
+    : logo;
+}
 
 /**
  * Ferret mascot + name; replaces the placeholder wordmark in the titlebar,
@@ -21,7 +33,7 @@ export function FerretWordmark(props: { size?: number }) {
       }}
     >
       <img
-        src={logo}
+        src={ferretLogo()}
         alt=""
         draggable={false}
         style={{

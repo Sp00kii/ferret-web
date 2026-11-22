@@ -22,7 +22,9 @@ export type FerretSettings = {
   ferretStyle: boolean;
   /** Which Ferret theme / accent colour (while ferretStyle is on) */
   ferretTheme: FerretThemeName;
-  ferretAccent: FerretAccentName;
+  ferretAccent: FerretAccentName | "custom";
+  /** "#rrggbb", used when ferretAccent is "custom" */
+  ferretAccentCustom: string;
   /** Ferret pop-ups with a reply box instead of Windows notifications */
   notificationPopups: boolean;
   /** Alternative app icon (window + tray) */
@@ -104,7 +106,8 @@ export type FerretSettingsPatch = {
   zoom?: number;
   pauseAnimations?: boolean | null;
   ferretTheme?: FerretThemeName;
-  ferretAccent?: FerretAccentName;
+  ferretAccent?: FerretAccentName | "custom";
+  ferretAccentCustom?: string;
   sounds?: Partial<Record<string, { choice: string }>>;
   /** null removes the person; a null sound goes back to the normal one */
   people?: Record<
@@ -119,6 +122,11 @@ export type FerretSettingsPatch = {
     pttBinding?: null;
   };
 };
+
+export type BackupResult =
+  | { status: "cancelled" }
+  | { status: "saved" | "restored"; files: number }
+  | { status: "error"; message: string };
 
 export type UpdateCheckResult =
   | { status: "up-to-date"; version: string }
@@ -171,6 +179,10 @@ export interface FerretBridge {
   /** Whether to show "What's new" (true only right after an update) */
   whatsNew(): Promise<{ show: boolean; version: string } | null>;
   whatsNewSeen(): Promise<boolean>;
+
+  /** Save / restore a .ferret-backup file (settings + own sound files) */
+  exportSettings(): Promise<BackupResult | null>;
+  importSettings(): Promise<BackupResult | null>;
 
   /** Waits (max 10 s) for a key or side mouse button; Escape cancels */
   capturePttBinding(): Promise<FerretSettings | null>;

@@ -5,7 +5,7 @@ import { styled } from "styled-system/jsx";
 
 import { Button } from "@revolt/ui";
 
-import { FERRET_LOGO } from "../Branding";
+import { ferretLogo } from "../Branding";
 
 import { type WhatsNewItem, latestNotes, notesFor } from "./notes";
 
@@ -62,7 +62,7 @@ export function WhatsNew() {
               onClick={(event) => event.stopPropagation()}
             >
               <header>
-                <img src={FERRET_LOGO} alt="" width={48} height={48} />
+                <img src={ferretLogo()} alt="" width={48} height={48} />
                 <div>
                   <h2 id="ferret-whats-new-title">What's new in Ferret</h2>
                   <span>Version {notes().version}</span>

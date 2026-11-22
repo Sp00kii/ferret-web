@@ -262,12 +262,92 @@ const CONTRAST: Record<string, string> = {
 
 export const isLightTheme = (theme: FerretThemeName) => theme === "cream";
 
+// ---- custom accent: derive readable shades from one colour -------------
+
+type RGB = [number, number, number];
+const toRgb = (hex: string): RGB => {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+const toHex = (rgb: RGB) =>
+  "#" +
+  rgb
+    .map((v) =>
+      Math.round(Math.min(255, Math.max(0, v)))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")
+    .toUpperCase();
+const mix = (a: string, b: string, amount: number) => {
+  const x = toRgb(a);
+  const y = toRgb(b);
+  return toHex([0, 1, 2].map((i) => x[i] + (y[i] - x[i]) * amount) as RGB);
+};
+const luminance = (hex: string) => {
+  const [r, g, b] = toRgb(hex).map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: string, b: string) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/** Nudge a colour towards `target` until it reads on `background` */
+function readable(
+  colour: string,
+  background: string,
+  target: string,
+  min: number,
+) {
+  let result = colour;
+  for (let step = 0; step < 12 && contrast(result, background) < min; step++) {
+    result = mix(result, target, 0.12);
+  }
+  return result;
+}
+
+export const isHexColour = (value: unknown): value is string =>
+  typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+
+function customAccent(hex: string): Accent {
+  const dark = readable(hex, "#101426", "#FFFFFF", 4.5);
+  const light = readable(hex, "#FFF6EC", "#000000", 4.5);
+  return {
+    label: "Custom",
+    dark: {
+      primary: dark,
+      on: contrast(dark, "#FFFFFF") >= 4.5 ? "#FFFFFF" : "#141414",
+      container: mix(dark, "#101426", 0.65),
+      tertiary: mix(dark, "#FFFFFF", 0.25),
+    },
+    light: {
+      primary: light,
+      on: contrast(light, "#FFFFFF") >= 4.5 ? "#FFFFFF" : "#141414",
+      container: mix(light, "#FFFFFF", 0.8),
+      onContainer: mix(light, "#000000", 0.7),
+      tertiary: mix(light, "#000000", 0.15),
+    },
+  };
+}
+
+/** A preset name ("copper") or a custom "#rrggbb" colour */
+export type FerretAccent = FerretAccentName | string;
+
+export function accentFor(value: FerretAccent): Accent {
+  if (isHexColour(value)) return customAccent(value);
+  return ACCENTS[value as FerretAccentName] ?? ACCENTS.copper;
+}
+
 /** Every Material colour token for a theme + accent */
 export function lookColours(
   theme: FerretThemeName,
-  accentName: FerretAccentName,
+  accentName: FerretAccent,
 ): Record<string, string> {
-  const accent = ACCENTS[accentName] ?? ACCENTS.copper;
+  const accent = accentFor(accentName);
   if (theme === "cream") {
     const a = accent.light;
     return {
@@ -296,10 +376,7 @@ export function lookColours(
 }
 
 /** The few colours the desktop pop-up windows need */
-export function popupColours(
-  theme: FerretThemeName,
-  accentName: FerretAccentName,
-) {
+export function popupColours(theme: FerretThemeName, accentName: FerretAccent) {
   const c = lookColours(theme, accentName);
   return {
     bg: c["surface-container-low"],

@@ -6,6 +6,7 @@ import type { Message } from "stoat.js";
 import { useClient } from "@revolt/client";
 
 import { useFerretSettings } from "../settings";
+import { chosenAccent } from "../theme/accent";
 import { popupColours } from "../theme/looks";
 
 const settings = useFerretSettings();
@@ -15,10 +16,7 @@ export function popupLook() {
   const config = settings();
   return config?.ferretStyle === false
     ? popupColours("midnight", "copper")
-    : popupColours(
-        config?.ferretTheme ?? "midnight",
-        config?.ferretAccent ?? "copper",
-      );
+    : popupColours(config?.ferretTheme ?? "midnight", chosenAccent(config));
 }
 
 /**

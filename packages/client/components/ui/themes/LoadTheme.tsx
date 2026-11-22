@@ -4,6 +4,7 @@ import { useClientLifecycle } from "@revolt/client";
 import { State } from "@revolt/client/Controller";
 // Ferret mod
 import { useFerretSettings } from "@revolt/ferret/settings";
+import { chosenAccent } from "@revolt/ferret/theme/accent";
 import { ferretThemeVariables } from "@revolt/ferret/theme/ferretTheme";
 import { useState } from "@revolt/state";
 
@@ -40,7 +41,7 @@ export function LoadTheme() {
 
   const ferretLook = () => ({
     theme: ferretSettings()?.ferretTheme ?? "midnight",
-    accent: ferretSettings()?.ferretAccent ?? "copper",
+    accent: chosenAccent(ferretSettings()),
   });
 
   createEffect(() => {

@@ -1,3 +1,5 @@
+import { logDiagnostic } from "../diagnostics/recorder";
+
 type GifCategory = { title: string; image: string };
 
 /**
@@ -24,18 +26,25 @@ const CURATED = [
   "Sports",
 ];
 
-/** mixed-case-in-the-middle ("OcIOBa") or digits = an id, not a name */
-function looksLikeId(title: string) {
-  if (/\d/.test(title)) return true;
-  return title
-    .split(/\s+/)
-    .some((word) => /[a-z]/.test(word) && /[A-Z]/.test(word.slice(1)));
+/**
+ * Keep only names that read like words: "Happy", "Thumbs up", "LOL",
+ * "Good morning". Ids mix upper and lower case inside a word ("OcIOBa",
+ * "pybbZQ") or contain digits, so they fail.
+ */
+const WORD = /^(?:[A-Z]?[a-z]+|[A-Z]{2,5})(?:['&-]?[a-z]+)*$/;
+
+export function isRealCategoryName(title: string) {
+  const words = title.trim().split(/\s+/);
+  return words.length > 0 && words.every((word) => WORD.test(word));
 }
 
 export function cleanGifCategories(categories: GifCategory[]): GifCategory[] {
   const real = categories.filter(
-    (category) => category.title?.trim() && !looksLikeId(category.title),
+    (category) =>
+      typeof category.title === "string" && isRealCategoryName(category.title),
   );
+  const hidden = categories.length - real.length;
+  if (hidden) logDiagnostic("gifs", `hid ${hidden} id-named GIF categories`);
   const have = new Set(real.map((category) => category.title.toLowerCase()));
   return [
     ...real,

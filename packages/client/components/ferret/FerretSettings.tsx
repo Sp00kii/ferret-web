@@ -1,4 +1,12 @@
-import { For, Show, createMemo, createSignal, onCleanup } from "solid-js";
+import {
+  For,
+  Match,
+  Show,
+  Switch,
+  createMemo,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 
 import { styled } from "styled-system/jsx";
 
@@ -15,7 +23,7 @@ import {
   Text,
 } from "@revolt/ui";
 
-import { FERRET_LOGO } from "./Branding";
+import { ferretLogo } from "./Branding";
 import type {
   FerretSettings as FerretSettingsType,
   UpdateCheckResult,
@@ -33,15 +41,31 @@ import {
   updateFerretSettings,
   useFerretSettings,
 } from "./settings";
+import { type FerretTab, ferretTab, setFerretTab } from "./settingsTab";
 import { SOUND_LIBRARY, SOUND_SLOTS, soundSource } from "./soundLibrary";
 import { IconPicker } from "./theme/IconPicker";
 import { LookPicker } from "./theme/LookPicker";
 import { MicTest } from "./voice/MicTest";
-import { VoiceExtrasSettings } from "./voice/VoiceExtrasSettings";
+import {
+  CompactWindowToggle,
+  SoundboardSettings,
+  TalkSettings,
+} from "./voice/VoiceExtrasSettings";
 import { showWhatsNew } from "./whatsNew/WhatsNew";
 
+const TABS: { id: FerretTab; label: string; icon: string }[] = [
+  { id: "look", label: "Appearance", icon: "palette" },
+  { id: "calls", label: "Calls & voice", icon: "call" },
+  { id: "sounds", label: "Sounds & alerts", icon: "notifications" },
+  { id: "app", label: "App", icon: "tune" },
+];
+
+const tab = ferretTab;
+const setTab = setFerretTab;
+
 /**
- * "Ferret" page in user settings: everything the mod adds, in one place.
+ * "Ferret" page in user settings: everything the mod adds, split into tabs
+ * so it isn't one endless page.
  */
 export function FerretSettings() {
   const settings = useFerretSettings();
@@ -57,7 +81,7 @@ export function FerretSettings() {
         <Column gap="lg">
           <Notice>
             <img
-              src={FERRET_LOGO}
+              src={ferretLogo()}
               alt=""
               width={40}
               height={40}
@@ -66,137 +90,254 @@ export function FerretSettings() {
             <span>{window.ferret!.unofficialNotice}</span>
           </Notice>
 
-          <Section title="Appearance">
-            <CategoryButton.Group>
-              <Toggle
-                icon="palette"
-                checked={config().ferretStyle}
-                onToggle={(ferretStyle) =>
-                  updateFerretSettings({ ferretStyle })
-                }
-                title="Ferret style"
-                description="Ferret's own themes and accent colours. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
-              />
-              <Toggle
-                icon="chat_bubble"
-                checked={config().notificationPopups}
-                onToggle={(notificationPopups) =>
-                  updateFerretSettings({ notificationPopups })
-                }
-                title="Ferret notification pop-ups"
-                description="Show new messages in a Ferret pop-up in the corner where you can reply straight away. Turn off to use normal Windows notifications. Which messages notify is still set in Settings → Notifications."
-              />
-            </CategoryButton.Group>
-            <Show when={config().ferretStyle}>
-              <LookPicker settings={config()} />
-            </Show>
-            <IconPicker settings={config()} />
+          <Tabs role="tablist" aria-label="Ferret settings">
+            <For each={TABS}>
+              {(entry) => (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={tab() === entry.id}
+                  data-active={tab() === entry.id ? "" : undefined}
+                  onClick={() => setTab(entry.id)}
+                >
+                  <Symbol size={18}>{entry.icon}</Symbol>
+                  {entry.label}
+                </button>
+              )}
+            </For>
+          </Tabs>
 
-            <Text class="label">Zoom</Text>
-            <Slider
-              min={50}
-              max={200}
-              step={5}
-              value={config().zoom}
-              onChange={(event) =>
-                updateFerretSettings({ zoom: event.currentTarget.value })
-              }
-              labelFormatter={(value) => `${value}%`}
-            />
-            <Text class="label">
-              Ctrl + and Ctrl − (or Ctrl + mouse wheel) change it too; Ctrl 0
-              resets to 100%.
-            </Text>
-            <CategoryButton.Group>
-              <Toggle
-                icon="motion_photos_paused"
-                checked={pauseAnimationsActive(config().pauseAnimations)}
-                onToggle={(pauseAnimations) =>
-                  updateFerretSettings({ pauseAnimations })
-                }
-                title="Pause GIFs and animated emoji until hovered"
-                description="Animated pictures, emoji and avatars stay still until you point at them. Starts out following Windows' animation setting."
-              />
-            </CategoryButton.Group>
-            <Text class="label">
-              Press Ctrl+K anywhere to jump to a friend, channel or server.
-            </Text>
-          </Section>
+          <Switch>
+            <Match when={tab() === "look"}>
+              <Section title="Look">
+                <CategoryButton.Group>
+                  <Toggle
+                    icon="palette"
+                    checked={config().ferretStyle}
+                    onToggle={(ferretStyle) =>
+                      updateFerretSettings({ ferretStyle })
+                    }
+                    title="Ferret style"
+                    description="Ferret's own themes and accent colours. Turn off for Stoat's normal theme and layout; your Appearance settings then apply as usual."
+                  />
+                </CategoryButton.Group>
+                <Show when={config().ferretStyle}>
+                  <LookPicker settings={config()} />
+                </Show>
+              </Section>
 
-          <Section title="Incoming calls">
-            <CategoryButton.Group>
-              <Toggle
-                icon="ring_volume"
-                checked={config().ringtone.enabled}
-                onToggle={(enabled) =>
-                  updateFerretSettings({ ringtone: { enabled } })
-                }
-                title="Ring for incoming calls"
-                description="Loop a ringtone and show a Windows notification when someone starts a call in a DM or group, or in a voice channel you watch below."
-              />
-              <Toggle
-                icon="minimize"
-                checked={config().ringtone.ringWhenHidden}
-                onToggle={(ringWhenHidden) =>
-                  updateFerretSettings({ ringtone: { ringWhenHidden } })
-                }
-                title="Ring while minimised or in the tray"
-                description="Turn off to only ring while the Ferret window is on screen."
-              />
-            </CategoryButton.Group>
+              <Section title="App icon">
+                <IconPicker settings={config()} />
+              </Section>
 
-            <Text class="label">Ringtone volume</Text>
-            <Slider
-              min={0}
-              max={100}
-              step={5}
-              value={config().ringtone.volume}
-              onChange={(event) =>
-                updateFerretSettings({
-                  ringtone: { volume: event.currentTarget.value },
-                })
-              }
-              labelFormatter={(value) => `${value}%`}
-            />
+              <Section title="Size and motion">
+                <Text class="label">Zoom</Text>
+                <Slider
+                  min={50}
+                  max={200}
+                  step={5}
+                  value={config().zoom}
+                  onChange={(event) =>
+                    updateFerretSettings({ zoom: event.currentTarget.value })
+                  }
+                  labelFormatter={(value) => `${value}%`}
+                />
+                <Text class="label">
+                  Ctrl + and Ctrl − (or Ctrl + mouse wheel) change it too; Ctrl
+                  0 resets to 100%.
+                </Text>
+                <CategoryButton.Group>
+                  <Toggle
+                    icon="motion_photos_paused"
+                    checked={pauseAnimationsActive(config().pauseAnimations)}
+                    onToggle={(pauseAnimations) =>
+                      updateFerretSettings({ pauseAnimations })
+                    }
+                    title="Pause GIFs and animated emoji until hovered"
+                    description="Animated pictures, emoji and avatars stay still until you point at them. Starts out following Windows' animation setting."
+                  />
+                </CategoryButton.Group>
+                <Text class="label">
+                  Tip: press Ctrl+K anywhere to jump to a friend, channel or
+                  server.
+                </Text>
+              </Section>
+            </Match>
 
-            <RingtonePicker ringtone={config().ringtone} />
-          </Section>
+            <Match when={tab() === "calls"}>
+              <Section title="Incoming calls">
+                <CategoryButton.Group>
+                  <Toggle
+                    icon="ring_volume"
+                    checked={config().ringtone.enabled}
+                    onToggle={(enabled) =>
+                      updateFerretSettings({ ringtone: { enabled } })
+                    }
+                    title="Ring for incoming calls"
+                    description="Loop a ringtone and show a Windows notification when someone starts a call in a DM or group, or in a voice channel you watch below."
+                  />
+                  <Toggle
+                    icon="minimize"
+                    checked={config().ringtone.ringWhenHidden}
+                    onToggle={(ringWhenHidden) =>
+                      updateFerretSettings({ ringtone: { ringWhenHidden } })
+                    }
+                    title="Ring while minimised or in the tray"
+                    description="Turn off to only ring while the Ferret window is on screen."
+                  />
+                </CategoryButton.Group>
+                <Text class="label">Ringtone volume</Text>
+                <Slider
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={config().ringtone.volume}
+                  onChange={(event) =>
+                    updateFerretSettings({
+                      ringtone: { volume: event.currentTarget.value },
+                    })
+                  }
+                  labelFormatter={(value) => `${value}%`}
+                />
+                <RingtonePicker ringtone={config().ringtone} />
+              </Section>
 
-          <WatchedChannels watched={config().watchedVoiceChannels} />
+              <WatchedChannels watched={config().watchedVoiceChannels} />
 
-          <SoundsSection settings={config()} />
+              <Section title="Microphone">
+                <VoiceInputOptions />
+                <MicTest />
+                <VoiceProcessingOptions />
+              </Section>
 
-          <PeopleSounds settings={config()} />
+              <Section title="Push to talk and shortcuts">
+                <TalkSettings voice={config().voice} />
+              </Section>
 
-          <Section title="Voice">
-            <VoiceInputOptions />
-            <MicTest />
-            <VoiceProcessingOptions />
-            <VoiceExtrasSettings
-              voice={config().voice}
-              soundboard={config().soundboard}
-            />
-            <CategoryButton.Group>
-              <Toggle
-                icon="network_check"
-                checked={config().showConnectionQuality}
-                onToggle={(showConnectionQuality) =>
-                  updateFerretSettings({ showConnectionQuality })
-                }
-                title="Show connection quality in calls"
-                description="Ping and packet loss next to the call status."
-              />
-            </CategoryButton.Group>
-          </Section>
+              <Section title="Soundboard">
+                <SoundboardSettings
+                  voice={config().voice}
+                  soundboard={config().soundboard}
+                />
+              </Section>
 
-          <ConnectionSection />
-          <UpdatesSection />
-          <DiagnosticsSection />
+              <Section title="During calls">
+                <CategoryButton.Group>
+                  <CompactWindowToggle voice={config().voice} />
+                  <Toggle
+                    icon="network_check"
+                    checked={config().showConnectionQuality}
+                    onToggle={(showConnectionQuality) =>
+                      updateFerretSettings({ showConnectionQuality })
+                    }
+                    title="Show connection quality in calls"
+                    description="Ping and packet loss next to the call status."
+                  />
+                </CategoryButton.Group>
+              </Section>
+            </Match>
+
+            <Match when={tab() === "sounds"}>
+              <Section title="Notifications">
+                <CategoryButton.Group>
+                  <Toggle
+                    icon="chat_bubble"
+                    checked={config().notificationPopups}
+                    onToggle={(notificationPopups) =>
+                      updateFerretSettings({ notificationPopups })
+                    }
+                    title="Ferret notification pop-ups"
+                    description="Show new messages in a Ferret pop-up in the corner where you can reply straight away. Turn off to use normal Windows notifications. Which messages notify is still set in Settings → Notifications."
+                  />
+                </CategoryButton.Group>
+              </Section>
+
+              <SoundsSection settings={config()} />
+
+              <PeopleSounds settings={config()} />
+            </Match>
+
+            <Match when={tab() === "app"}>
+              <ConnectionSection />
+              <BackupSection />
+              <UpdatesSection />
+              <DiagnosticsSection />
+            </Match>
+          </Switch>
         </Column>
       )}
     </Show>
   );
 }
+
+function BackupSection() {
+  const [message, setMessage] = createSignal<string>();
+  const run = async (action: "export" | "import") => {
+    setMessage(undefined);
+    const result =
+      action === "export"
+        ? await window.ferret!.exportSettings()
+        : await window.ferret!.importSettings();
+    if (!result || result.status === "cancelled") return;
+    if (result.status === "error") return setMessage(result.message);
+    setMessage(
+      result.status === "saved"
+        ? `Backup saved, including ${result.files} of your sound files.`
+        : `Settings restored, including ${result.files} sound files.`,
+    );
+  };
+
+  return (
+    <Section title="Backup">
+      <Text class="label">
+        Save all Ferret settings and your own sounds, ringtones and soundboard
+        clips to one file, so you can restore them on a new PC or after a
+        reinstall. The file holds no passwords or account details.
+      </Text>
+      <Buttons>
+        <Button variant="tonal" onPress={() => void run("export")}>
+          <Symbol>download</Symbol> Save backup…
+        </Button>
+        <Button variant="tonal" onPress={() => void run("import")}>
+          <Symbol>upload</Symbol> Restore from backup…
+        </Button>
+      </Buttons>
+      <Show when={message()}>
+        <Text class="label">{message()}</Text>
+      </Show>
+    </Section>
+  );
+}
+
+const Tabs = styled("div", {
+  base: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "var(--gap-sm)",
+    padding: "4px",
+    borderRadius: "999px",
+    background: "var(--md-sys-color-surface-container)",
+    width: "fit-content",
+    "& button": {
+      display: "flex",
+      alignItems: "center",
+      gap: "6px",
+      padding: "8px 16px",
+      border: "none",
+      borderRadius: "999px",
+      background: "transparent",
+      color: "var(--md-sys-color-on-surface-variant)",
+      font: "inherit",
+      fontWeight: 600,
+      cursor: "pointer",
+    },
+    "& button:hover": { color: "var(--md-sys-color-on-surface)" },
+    "& button[data-active]": {
+      background: "var(--md-sys-color-secondary-container)",
+      color: "var(--md-sys-color-on-secondary-container)",
+    },
+  },
+});
 
 function Section(props: { title: string; children: unknown }) {
   return (

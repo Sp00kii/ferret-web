@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/solid-query";
 import { styled } from "styled-system/jsx";
 
+import { ProfileSounds } from "@revolt/ferret/ProfileSounds"; // Ferret mod
 import { Dialog, DialogProps, Profile } from "@revolt/ui";
 
 import { useModals } from "..";
@@ -56,6 +57,8 @@ export function UserProfileModal(
         <Profile.Joined user={props.user} member={props.member} />
         <Profile.Mutuals user={props.user} member={props.member} />
         <Profile.Bio content={query.data?.content} full />
+        {/* Ferret mod: per-person ringtone / message sound */}
+        <ProfileSounds user={props.user} />
       </Grid>
     </Dialog>
   );

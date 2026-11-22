@@ -1,6 +1,7 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 
 import { Trans, useLingui } from "@lingui/solid/macro";
+import { FerretSettingsLink } from "@revolt/ferret/FerretSettingsLink"; // Ferret mod
 import { css } from "styled-system/css";
 import { styled } from "styled-system/jsx";
 
@@ -54,6 +55,12 @@ export function AppearanceMenu() {
 
   return (
     <Column gap="lg">
+      {/* Ferret mod */}
+      <FerretSettingsLink
+        tab="look"
+        title="Ferret themes and app icons"
+        description="Midnight, Cream and High contrast, any accent colour, ten app icons, zoom and paused GIFs."
+      />
       <MessagePreview>
         <Text>
           Welcome to the new appearance menu, custom themes are not available

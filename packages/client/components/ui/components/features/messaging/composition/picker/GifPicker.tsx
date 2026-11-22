@@ -19,7 +19,6 @@ import { useClient } from "@revolt/client";
 import { debounce, useDevice } from "@revolt/common";
 // Ferret mod
 import { cleanGifCategories } from "@revolt/ferret/gifs/categories";
-import { FavouriteStar } from "@revolt/ferret/gifs/FavouriteStar";
 import { useInstance } from "@revolt/instance";
 import { useState } from "@revolt/state";
 import {
@@ -673,10 +672,6 @@ function GifLayout(props: {
                 }}
               >
                 <Gif gif={embed} preSized noModal />
-                {/* Ferret mod: favourite straight from the picker */}
-                <Show when={window.ferret}>
-                  <FavouriteStar embed={embed} />
-                </Show>
               </GifTile>
             );
           }}

@@ -1,6 +1,7 @@
 import { Trans } from "@lingui/solid/macro";
 import { useClient } from "@revolt/client";
 import { updateFerretSettings } from "@revolt/ferret/settings"; // Ferret mod
+import { setFerretTab } from "@revolt/ferret/settingsTab"; // Ferret mod
 import { useModals } from "@revolt/modal";
 import { useSmartParams } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -34,7 +35,7 @@ export function UserContextMenu(props: {
   const state = useState();
   const client = useClient();
   const navigate = useNavigate();
-  const { openModal, modals } = useModals();
+  const { openModal, modals, remove: removeModal } = useModals();
 
   // server context
   const params = useSmartParams();
@@ -462,6 +463,11 @@ export function UserContextMenu(props: {
             void updateFerretSettings({
               people: { [props.user.id]: { name: props.user.displayName } },
             });
+            // close this person's profile so settings aren't hidden behind it
+            for (const modal of modals)
+              if (modal.show && modal.props.type === "user_profile")
+                removeModal(modal.id);
+            setFerretTab("sounds");
             openModal({
               type: "settings",
               config: "user",
