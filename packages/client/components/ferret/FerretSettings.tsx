@@ -105,7 +105,7 @@ export function FerretSettings() {
       // plain codes then
     }
     const entries: Record<string, { title: string }> = {
-      auto: { title: "Automatic (Ferret's language)" },
+      auto: { title: "Automatic (your Windows language)" },
     };
     for (const code of [...codes].sort())
       entries[code] = { title: `${names?.of(code) ?? code} (${code})` };
@@ -323,6 +323,11 @@ export function FerretSettings() {
                     description="Some sites block Stoat's link previews. Ferret then fetches the page's title and picture itself, so the site sees your IP address, like when you open the link."
                   />
                 </CategoryButton.Group>
+                <Text class="label">
+                  Spellcheck is the red line under misspelled words; the
+                  language picks which words count as right. Turn it off in
+                  Settings → Desktop → Spellchecker.
+                </Text>
                 <Text class="label">
                   Tip: press Ctrl+K anywhere to jump to a friend, channel or
                   server.
