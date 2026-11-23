@@ -42,6 +42,12 @@ html[data-ferret-underline-links] a[href^="http"] {
   text-decoration: underline !important;
   text-underline-offset: 2px;
 }
+html[data-ferret-avatar-shape="rounded"] svg > g > foreignObject > div {
+  border-radius: 25% !important;
+}
+html[data-ferret-avatar-shape="square"] svg > g > foreignObject > div {
+  border-radius: 0 !important;
+}
 html[data-ferret-reduce-motion] *,
 html[data-ferret-reduce-motion] *::before,
 html[data-ferret-reduce-motion] *::after {
@@ -58,8 +64,8 @@ const setFlag = (name: string, on: boolean) =>
   on ? ROOT.setAttribute(name, "") : ROOT.removeAttribute(name);
 
 /**
- * Applies "Pause GIFs and animated emoji until hovered", "Reduce motion"
- * and "Underline links". Renders nothing.
+ * Applies "Pause GIFs and animated emoji until hovered", "Reduce motion",
+ * "Underline links" and the avatar shape. Renders nothing.
  */
 export function FerretMotion() {
   if (!window.ferret) return null;
@@ -82,10 +88,18 @@ export function FerretMotion() {
   createEffect(() =>
     setFlag("data-ferret-underline-links", !!settings()?.underlineLinks),
   );
+  // round (Stoat's normal), rounded square or square avatars
+  createEffect(() => {
+    const shape = settings()?.avatarShape;
+    if (shape && shape !== "circle")
+      ROOT.setAttribute("data-ferret-avatar-shape", shape);
+    else ROOT.removeAttribute("data-ferret-avatar-shape");
+  });
   onCleanup(() => {
     reduceMotion = false;
     setFlag("data-ferret-reduce-motion", false);
     setFlag("data-ferret-underline-links", false);
+    ROOT.removeAttribute("data-ferret-avatar-shape");
   });
 
   return null;

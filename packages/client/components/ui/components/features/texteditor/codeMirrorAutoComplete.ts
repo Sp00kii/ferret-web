@@ -1,12 +1,17 @@
 import {
   acceptCompletion,
   autocompletion,
+  closeCompletion,
   Completion,
+  completionStatus,
   currentCompletions,
   pickedCompletion,
 } from "@codemirror/autocomplete";
+import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
 import { Accessor } from "solid-js";
+
+import { useFerretSettings } from "@revolt/ferret/settings"; // Ferret mod
 
 import { scrollableStyles } from "../../../directives/scrollable";
 import { AutoCompleteSearchSpace } from "../../utils/autoComplete";
@@ -182,5 +187,32 @@ export function codeMirrorAutoComplete(
     }
   });
 
-  return [extension, emojiKeymap, recordAccept, completionTheme];
+  // Ferret mod: optionally only Tab (or ":") picks an emoji suggestion, so
+  // typing ":c" or ":o" then Enter sends it as typed (stoatchat/for-web#628)
+  const ferretSettings = useFerretSettings();
+  const enterSkipsEmoji = Prec.highest(
+    keymap.of([
+      {
+        key: "Enter",
+        run: (view) => {
+          if (
+            ferretSettings()?.tabPicksEmoji &&
+            completionStatus(view.state) === "active" &&
+            currentCompletions(view.state)[0]?.type === "emoji"
+          )
+            closeCompletion(view);
+          // let Enter do its normal thing (send / new line)
+          return false;
+        },
+      },
+    ]),
+  );
+
+  return [
+    enterSkipsEmoji,
+    extension,
+    emojiKeymap,
+    recordAccept,
+    completionTheme,
+  ];
 }

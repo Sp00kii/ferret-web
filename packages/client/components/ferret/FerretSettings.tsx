@@ -4,6 +4,7 @@ import {
   Show,
   Switch,
   createMemo,
+  createResource,
   createSignal,
   onCleanup,
 } from "solid-js";
@@ -39,6 +40,7 @@ import {
   pauseAnimationsActive,
   reduceMotionActive,
 } from "./motion/FerretMotion";
+import { friendLink } from "./Navigation";
 import { FERRET_NOISES, FERRET_NOISE_NAMES, NOISES_ID } from "./noises";
 import { PeopleSounds } from "./PeopleSounds";
 import { RINGTONES, ringtoneSource } from "./ringtones";
@@ -88,6 +90,27 @@ const READABLE_FONTS: [Fonts, string][] = [
 export function FerretSettings() {
   const settings = useFerretSettings();
   const stoatState = useState();
+
+  // spellchecker languages, with their names in your language
+  const [spellcheckLanguages] = createResource(
+    async () => (await window.ferret?.spellcheckLanguages()) ?? [],
+  );
+  const spellcheckOptions = () => {
+    const codes = spellcheckLanguages();
+    if (!codes?.length) return undefined;
+    let names: Intl.DisplayNames | undefined;
+    try {
+      names = new Intl.DisplayNames([navigator.language], { type: "language" });
+    } catch {
+      // plain codes then
+    }
+    const entries: Record<string, { title: string }> = {
+      auto: { title: "Automatic (Ferret's language)" },
+    };
+    for (const code of [...codes].sort())
+      entries[code] = { title: `${names?.of(code) ?? code} (${code})` };
+    return entries;
+  };
 
   // the font is Stoat's own setting (also in Appearance); a font picked
   // there that isn't one of these stays in the list
@@ -154,6 +177,29 @@ export function FerretSettings() {
                 <Show when={config().ferretStyle}>
                   <LookPicker settings={config()} />
                 </Show>
+              </Section>
+
+              <Section title="Avatars">
+                <CategoryButton.Group>
+                  <CategoryButton.Select
+                    icon={<Symbol>account_circle</Symbol>}
+                    title="Avatar shape"
+                    value={config().avatarShape}
+                    options={{
+                      circle: { title: "Round (Stoat's normal)" },
+                      rounded: { title: "Rounded square" },
+                      square: { title: "Square" },
+                    }}
+                    onUpdate={(avatarShape) =>
+                      updateFerretSettings({
+                        avatarShape: avatarShape as
+                          | "circle"
+                          | "rounded"
+                          | "square",
+                      })
+                    }
+                  />
+                </CategoryButton.Group>
               </Section>
 
               <Section title="App icon">
@@ -242,8 +288,31 @@ export function FerretSettings() {
                 </CategoryButton.Group>
               </Section>
 
-              <Section title="Links">
+              <Section title="Messages and links">
                 <CategoryButton.Group>
+                  <Toggle
+                    icon="keyboard_tab"
+                    checked={config().tabPicksEmoji}
+                    onToggle={(tabPicksEmoji) =>
+                      updateFerretSettings({ tabPicksEmoji })
+                    }
+                    title="Only Tab picks emoji suggestions"
+                    description="Enter sends what you typed instead of turning :c or :o into an emoji. Tab (or typing the closing :) still picks the suggestion."
+                  />
+                  <Show when={spellcheckOptions()}>
+                    <CategoryButton.Select
+                      icon={<Symbol>spellcheck</Symbol>}
+                      title="Spellcheck language"
+                      value={config().spellcheckLanguage ?? "auto"}
+                      options={spellcheckOptions()!}
+                      onUpdate={(language) =>
+                        updateFerretSettings({
+                          spellcheckLanguage:
+                            language === "auto" ? null : language,
+                        })
+                      }
+                    />
+                  </Show>
                   <Toggle
                     icon="link"
                     checked={config().linkPreviews}
@@ -356,6 +425,7 @@ export function FerretSettings() {
 
             <Match when={tab() === "app"}>
               <ConnectionSection />
+              <FriendLinkSection />
               <BackupSection />
               <UpdatesSection />
               <DiagnosticsSection />
@@ -444,6 +514,37 @@ function Section(props: { title: string; children: unknown }) {
       </Text>
       {props.children as never}
     </Column>
+  );
+}
+
+/** A ferret:// link that opens "Add friend" for you in a friend's Ferret */
+function FriendLinkSection() {
+  const client = useClient();
+  const [copied, setCopied] = createSignal(false);
+  const link = () => {
+    const user = client()?.user;
+    return user ? friendLink(user.username, user.discriminator) : undefined;
+  };
+
+  return (
+    <Show when={link()}>
+      <Section title="Your friend link">
+        <CategoryButton.Group>
+          <CategoryButton
+            icon={<Symbol>person_add</Symbol>}
+            description={`${link()} — friends with Ferret open it to get "Add friend" with your name filled in; they still press Send themselves.`}
+            onClick={() =>
+              void navigator.clipboard.writeText(link()!).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              })
+            }
+          >
+            {copied() ? "Copied!" : "Copy your friend link"}
+          </CategoryButton>
+        </CategoryButton.Group>
+      </Section>
+    </Show>
   );
 }
 

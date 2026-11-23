@@ -31,6 +31,12 @@ export type FerretSettings = {
   linkPreviews: boolean;
   /** Underline links in messages */
   underlineLinks: boolean;
+  /** Only Tab (not Enter) picks an emoji suggestion */
+  tabPicksEmoji: boolean;
+  /** Spellchecker language, e.g. "en-GB"; null = automatic */
+  spellcheckLanguage: string | null;
+  /** Shape of avatars everywhere */
+  avatarShape: "circle" | "rounded" | "square";
   /** Turn animations off; null = follow Windows */
   reduceMotion: boolean | null;
   /** Alternative app icon (window + tray) */
@@ -145,6 +151,9 @@ export type FerretSettingsPatch = {
   notificationPopups?: boolean;
   linkPreviews?: boolean;
   underlineLinks?: boolean;
+  tabPicksEmoji?: boolean;
+  spellcheckLanguage?: string | null;
+  avatarShape?: "circle" | "rounded" | "square";
   reduceMotion?: boolean | null;
   /** an empty string or null removes the nickname */
   nicknames?: Record<string, string | null>;
@@ -231,6 +240,9 @@ export interface FerretBridge {
   /** Whether to show "What's new" (true only right after an update) */
   whatsNew(): Promise<{ show: boolean; version: string } | null>;
   whatsNewSeen(): Promise<boolean>;
+
+  /** Languages the spellchecker has, e.g. ["en-GB", "nl"] */
+  spellcheckLanguages(): Promise<string[] | null>;
 
   /** Ferret's own preview for a link, or null */
   linkPreview(url: string): Promise<FerretLinkPreview | null>;

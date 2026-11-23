@@ -19,6 +19,26 @@ export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
         title: "Ferret in your Discord status",
         text: "Turn on Settings → Desktop → Discord status and your Discord profile shows you're using Ferret.",
       },
+      {
+        icon: "🕒",
+        title: "Times in everyone's time zone",
+        text: "The clock button in the message box adds a time that everyone sees in their own time zone. Times now follow your 12 / 24-hour setting too.",
+      },
+      {
+        icon: "🤝",
+        title: "Friend links",
+        text: "Settings → Ferret → App → Copy your friend link. Friends with Ferret open it to add you in one click.",
+      },
+      {
+        icon: "⌨️",
+        title: "Typing extras",
+        text: 'Optionally only Tab picks emoji suggestions, pick your spellcheck language, and copied replies keep "Replying to".',
+      },
+      {
+        icon: "🟦",
+        title: "Avatar shape",
+        text: "Round, rounded square or square avatars (Settings → Ferret → Appearance).",
+      },
     ],
   },
   {

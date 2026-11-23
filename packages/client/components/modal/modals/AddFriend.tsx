@@ -17,7 +17,8 @@ export function AddFriendModal(
   const { showError } = useModals();
 
   const group = createFormGroup({
-    username: createFormControl("", { required: true }),
+    // Ferret mod: a friend link fills in the name; you still press Send
+    username: createFormControl(props.username ?? "", { required: true }),
   });
 
   async function onSubmit() {

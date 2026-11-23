@@ -15,6 +15,7 @@ import { useClient } from "@revolt/client";
 import { debounce } from "@revolt/common";
 import { createIsTimedOut } from "@revolt/common/lib/createIsTimedOut";
 import { PersonaButton } from "@revolt/ferret/PersonaButton"; // Ferret mod
+import { TimeButton } from "@revolt/ferret/TimeButton"; // Ferret mod
 import { masqueradeFor } from "@revolt/ferret/personas"; // Ferret mod
 import { useInstance } from "@revolt/instance";
 import { createKeybind, Keybind, KeybindAction } from "@revolt/keybinds";
@@ -392,8 +393,10 @@ export function MessageComposition(props: Props) {
                 </IconButton>
               </MessageBox.InlineIcon>
             </Show>
-            {/* Ferret mod: post as a persona (masquerade), where allowed */}
+            {/* Ferret mod: post as a persona (masquerade), where allowed;
+                add a time everyone sees in their own time zone */}
             <PersonaButton channel={props.channel} />
+            <TimeButton onInsert={(text) => setNodeReplacement([text])} />
           </>
         }
         actionsEnd={

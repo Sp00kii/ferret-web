@@ -10,6 +10,27 @@ import { useState } from "@revolt/state";
 
 import { time as Time } from "../elements";
 
+/**
+ * Ferret mod: times follow your 12 / 24-hour setting. "hh:mm" was a 12-hour
+ * clock without AM / PM, so 21:00 showed as 09:00.
+ */
+export function formatTimestamp(date: Dayjs, style: string) {
+  switch (style) {
+    case "t":
+      return date.format("LT");
+    case "T":
+      return date.format("LTS");
+    case "R":
+      return date.fromNow();
+    case "D":
+      return date.format("LL");
+    case "F":
+      return `${date.format("dddd, LL")} ${date.format("LT")}`;
+    default:
+      return `${date.format("LL")} ${date.format("LT")}`;
+  }
+}
+
 export function RenderTimestamp(props: { format: string; date: Dayjs }) {
   const { datePerDay } = useState();
 
@@ -17,20 +38,7 @@ export function RenderTimestamp(props: { format: string; date: Dayjs }) {
    * Format a time string
    */
   function format() {
-    switch (props.format) {
-      case "t":
-        return props.date.format("hh:mm");
-      case "T":
-        return props.date.format("hh:mm:ss");
-      case "R":
-        return props.date.fromNow();
-      case "D":
-        return props.date.format("DD MMMM YYYY");
-      case "F":
-        return props.date.format("dddd, DD MMMM YYYY hh:mm");
-      default:
-        return props.date.format("DD MMMM YYYY hh:mm");
-    }
+    return formatTimestamp(props.date, props.format);
   }
 
   // Signal for current value

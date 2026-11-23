@@ -39,7 +39,9 @@ export const Base = styled("div", {
     minWidth: 0,
     flexGrow: 1,
     display: "flex",
-    userSelect: "none",
+    // Ferret mod: selectable, so copying messages keeps "Replying to …"
+    // (stoatchat/for-web#172)
+    userSelect: "text",
     alignItems: "center",
     gap: "var(--gap-sm)",
     color: "var(--md-sys-color-on-surface)",
@@ -79,6 +81,9 @@ const user = cva({
     display: "flex",
     alignItems: "center",
     gap: "var(--gap-sm)",
+    // Ferret mod: the name is copied too
+    userSelect: "text",
+    "& *": { userSelect: "text" },
   },
 });
 
@@ -122,6 +127,8 @@ export function MessageReply(props: Props) {
           <Trans>Blocked User</Trans>
         </Match>
         <Match when={props.message}>
+          {/* Ferret mod: only in copied text */}
+          <CopyOnly>Replying to </CopyOnly>
           <div
             class={user()}
             use:floating={floatingUserMenusFromMessage(props.message!)}
@@ -139,6 +146,7 @@ export function MessageReply(props: Props) {
                 }
               />
             </NonBreakingText>
+            <CopyOnly>: </CopyOnly>
           </div>
           <Link href={props.message!.path}>
             <Show when={props.message!.attachments}>
@@ -162,6 +170,18 @@ export function MessageReply(props: Props) {
     </Base>
   );
 }
+
+/**
+ * Text that's invisible but copied with the message (Ferret mod). Kept in
+ * the line (no absolute position), so copying doesn't add line breaks.
+ */
+const CopyOnly = styled("span", {
+  base: {
+    fontSize: "0",
+    color: "transparent",
+    userSelect: "text",
+  },
+});
 
 const ReplyContent = styled("div", {
   base: {

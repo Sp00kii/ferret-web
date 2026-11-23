@@ -1,4 +1,4 @@
-import { For, Show, createSignal, onCleanup } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import type { Channel } from "stoat.js";
@@ -9,6 +9,15 @@ import { MessageBox } from "@revolt/ui/components/features/messaging/composition
 import { Symbol } from "@revolt/ui/components/utils/Symbol";
 
 import {
+  ErrorText,
+  Heading,
+  Hint,
+  Input,
+  PANEL_WIDTH,
+  Panel,
+  useOutsideClose,
+} from "./composerPanel";
+import {
   MAX_PERSONAS,
   canMasquerade,
   newPersonaId,
@@ -17,8 +26,6 @@ import {
   pickPersona,
   savePersonas,
 } from "./personas";
-
-const PANEL_WIDTH = 300;
 
 /**
  * Mask button in the message box: post as one of your personas (another
@@ -54,15 +61,7 @@ function PersonaMenu(props: { channel: Channel }) {
     });
   };
 
-  const onPointerDown = (event: PointerEvent) => {
-    const target = event.target as Node;
-    if (open() && !wrapper?.contains(target) && !panel?.contains(target))
-      setOpen(false);
-  };
-  document.addEventListener("pointerdown", onPointerDown, true);
-  onCleanup(() =>
-    document.removeEventListener("pointerdown", onPointerDown, true),
-  );
+  useOutsideClose(open, setOpen, () => [wrapper, panel]);
 
   const run = async (work: () => Promise<unknown>) => {
     setError(undefined);
@@ -229,28 +228,6 @@ function PersonaMenu(props: { channel: Channel }) {
   );
 }
 
-const Panel = styled("div", {
-  base: {
-    position: "fixed",
-    zIndex: 1000,
-    width: `${PANEL_WIDTH}px`,
-    maxHeight: "min(520px, 75vh)",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px",
-    padding: "10px",
-    borderRadius: "16px",
-    color: "var(--md-sys-color-on-surface)",
-    background: "var(--md-sys-color-surface-container-high)",
-    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
-  },
-});
-
-const Heading = styled("div", {
-  base: { fontWeight: 600, padding: "6px 4px 2px" },
-});
-
 const Row = styled("div", {
   base: { display: "flex", alignItems: "center", gap: "4px" },
 });
@@ -303,20 +280,6 @@ const Remove = styled("button", {
   },
 });
 
-const Input = styled("input", {
-  base: {
-    width: "100%",
-    padding: "8px 10px",
-    border: "none",
-    borderRadius: "10px",
-    fontSize: "13px",
-    color: "var(--md-sys-color-on-surface)",
-    background: "var(--md-sys-color-surface-container-highest)",
-    outline: "none",
-    "&:focus": { boxShadow: "0 0 0 2px var(--md-sys-color-primary)" },
-  },
-});
-
 const ColourRow = styled("div", {
   base: {
     display: "flex",
@@ -345,16 +308,4 @@ const AddButton = styled("button", {
     color: "var(--md-sys-color-on-primary)",
     background: "var(--md-sys-color-primary)",
   },
-});
-
-const Hint = styled("div", {
-  base: {
-    paddingTop: "6px",
-    fontSize: "11px",
-    color: "var(--md-sys-color-outline)",
-  },
-});
-
-const ErrorText = styled("div", {
-  base: { fontSize: "12px", color: "var(--md-sys-color-error)" },
 });

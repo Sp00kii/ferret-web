@@ -1,7 +1,10 @@
+import { installCopyReplies } from "./copyReplies";
 import { installNicknames } from "./nicknames";
 
-// private nicknames apply everywhere names are shown
+// private nicknames apply everywhere names are shown; copied replies keep
+// "Replying to <name>: …" on one line
 installNicknames();
+installCopyReplies();
 
 export { FerretBadge } from "./badge";
 export type { FerretBridge, FerretSettings } from "./bridge";

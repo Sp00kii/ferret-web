@@ -37,6 +37,8 @@ export type Modals =
   | {
       type: "add_friend";
       client: Client;
+      /** Ferret mod: filled in from a friend link (username#1234) */
+      username?: string;
     }
   | {
       type: "add_members_to_group";
