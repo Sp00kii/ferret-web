@@ -6,6 +6,7 @@ import {
   completionStatus,
   currentCompletions,
   pickedCompletion,
+  setSelectedCompletion,
 } from "@codemirror/autocomplete";
 import { Prec } from "@codemirror/state";
 import { EditorView, keymap } from "@codemirror/view";
@@ -167,6 +168,22 @@ export function codeMirrorAutoComplete(
     if (
       key === ":" ? completions[0]?.type === "emoji" : completions.length > 0
     ) {
+      // Ferret mod: typing the closing ":" picks the emoji whose name is
+      // exactly what you typed (":cat:" was turning into :cat-face:, the
+      // first suggestion; stoatchat/for-web#1526)
+      if (key === ":") {
+        const cursor = view.state.selection.main.head;
+        const line = view.state.doc.lineAt(cursor);
+        const typed = line.text
+          .slice(0, cursor - line.from)
+          .match(/:[\p{L}\w\-+]*$/u)?.[0];
+        const exact = typed
+          ? completions.findIndex(
+              (completion) => completion.label === `${typed}:`,
+            )
+          : -1;
+        if (exact > 0) view.dispatch({ effects: setSelectedCompletion(exact) });
+      }
       acceptCompletion(view as never);
       return true;
     }

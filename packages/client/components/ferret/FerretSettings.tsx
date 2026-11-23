@@ -91,6 +91,11 @@ export function FerretSettings() {
   const settings = useFerretSettings();
   const stoatState = useState();
 
+  // spellchecking on / off lives in the desktop app's own settings
+  const [spellcheckOn, setSpellcheckOn] = createSignal(
+    window.desktopConfig?.get().spellchecker ?? true,
+  );
+
   // spellchecker languages, with their names in your language
   const [spellcheckLanguages] = createResource(
     async () => (await window.ferret?.spellcheckLanguages()) ?? [],
@@ -105,7 +110,8 @@ export function FerretSettings() {
       // plain codes then
     }
     const entries: Record<string, { title: string }> = {
-      auto: { title: "Automatic (your Windows language)" },
+      off: { title: "Off (no red underlines)" },
+      auto: { title: "On, automatic (your Windows language)" },
     };
     for (const code of [...codes].sort())
       entries[code] = { title: `${names?.of(code) ?? code} (${code})` };
@@ -302,15 +308,27 @@ export function FerretSettings() {
                   <Show when={spellcheckOptions()}>
                     <CategoryButton.Select
                       icon={<Symbol>spellcheck</Symbol>}
-                      title="Spellcheck language"
-                      value={config().spellcheckLanguage ?? "auto"}
-                      options={spellcheckOptions()!}
-                      onUpdate={(language) =>
-                        updateFerretSettings({
-                          spellcheckLanguage:
-                            language === "auto" ? null : language,
-                        })
+                      title="Spellcheck"
+                      value={
+                        spellcheckOn()
+                          ? (config().spellcheckLanguage ?? "auto")
+                          : "off"
                       }
+                      options={spellcheckOptions()!}
+                      onUpdate={(language) => {
+                        // "Off" is the same switch as Settings -> Desktop ->
+                        // Spellchecker; picking a language turns it back on
+                        const on = language !== "off";
+                        if (on !== spellcheckOn()) {
+                          window.desktopConfig?.set({ spellchecker: on });
+                          setSpellcheckOn(on);
+                        }
+                        if (on)
+                          void updateFerretSettings({
+                            spellcheckLanguage:
+                              language === "auto" ? null : language,
+                          });
+                      }}
                     />
                   </Show>
                   <Toggle
@@ -325,8 +343,8 @@ export function FerretSettings() {
                 </CategoryButton.Group>
                 <Text class="label">
                   Spellcheck is the red line under misspelled words; the
-                  language picks which words count as right. Turn it off in
-                  Settings → Desktop → Spellchecker.
+                  language picks which words count as right. Off turns it off
+                  (same as Settings → Desktop → Spellchecker).
                 </Text>
                 <Text class="label">
                   Tip: press Ctrl+K anywhere to jump to a friend, channel or

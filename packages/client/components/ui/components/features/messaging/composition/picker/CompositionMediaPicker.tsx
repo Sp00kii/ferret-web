@@ -216,6 +216,9 @@ function Picker(
  */
 const Base = styled("div", {
   base: {
+    // Ferret mod: above the floating call window (z-index 10), which used
+    // to cover the emoji / GIF picker in a small window (stoatchat/for-web#889)
+    zIndex: 20,
     width: "400px",
     height: "400px",
     maxWidth: "100%",

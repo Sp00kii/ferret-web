@@ -15,6 +15,7 @@ export { FerretMotion } from "./motion/FerretMotion";
 export { FerretNavigation } from "./Navigation";
 export { FerretToastActions } from "./notifications/toasts";
 export { QuickSwitcher } from "./QuickSwitcher";
+export { RolePreviewBanner } from "./RolePreviewBanner";
 export { useFerretSettings } from "./settings";
 export { ConnectionQualityBadge } from "./voice/ConnectionQuality";
 export { followPreferredDevices } from "./voice/devices";

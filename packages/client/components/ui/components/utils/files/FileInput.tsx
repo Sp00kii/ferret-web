@@ -89,25 +89,31 @@ export function FileInput(props: Props) {
    */
   function onChange(e: Event & { currentTarget: HTMLInputElement }) {
     if (!e.currentTarget.files) return;
+    if (!takeFiles([...e.currentTarget.files])) e.currentTarget.files = null;
+  }
 
+  /**
+   * Ferret mod: shared by the file picker and drag and drop
+   * (stoatchat/for-web#150). Returns false if the files were refused.
+   */
+  function takeFiles(files: File[]) {
     // If accept is an image, check all the files submitted if they match our accept values
     if (local.accept === "image/*") {
-      for (const file of e.currentTarget.files) {
+      for (const file of files) {
         if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
           // If they were stubborn enough to disable our filter for files then just ignore the file.
           // No need for feedback, they know what they did.
           local.onFiles(null);
-          e.currentTarget.files = null;
-          return;
+          return false;
         }
       }
     }
 
-    const selected = [...e.currentTarget.files];
+    const selected = local.multiple ? files : files.slice(0, 1);
 
     if (local.process) {
       setPendingProcess(selected);
-      return;
+      return true;
     }
 
     // NB. need to help out with the reactivity by
@@ -115,6 +121,31 @@ export function FileInput(props: Props) {
     //     the new one; otherwise no update! ¯\_(ツ)_/¯
     local.onFiles(null);
     local.onFiles(selected);
+    return true;
+  }
+
+  // Ferret mod: drop an image straight onto the picture to upload it. The
+  // events stop here, so the page doesn't also attach it to a message.
+  const [dragging, setDragging] = createSignal(false);
+  const hasFiles = (event: DragEvent) =>
+    !!event.dataTransfer &&
+    [...event.dataTransfer.items].some((item) => item.kind === "file");
+  function onDragOver(event: DragEvent) {
+    if (props.disabled || !hasFiles(event)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer!.dropEffect = "copy";
+    setDragging(true);
+  }
+  function onDragLeave() {
+    setDragging(false);
+  }
+  function onDrop(event: DragEvent) {
+    if (props.disabled || !event.dataTransfer?.files.length) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setDragging(false);
+    takeFiles([...event.dataTransfer.files]);
   }
 
   function resolveProcess(result: File[] | null) {
@@ -185,8 +216,16 @@ export function FileInput(props: Props) {
           <Row align justify={props.imageJustify ?? true} gap="lg">
             <ImagePreview
               onClick={() => inputRef!.click()}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              title="Click or drop an image here"
               style={{
                 "aspect-ratio": props.imageAspect ?? "1/1",
+                outline: dragging()
+                  ? "2px dashed var(--md-sys-color-primary)"
+                  : undefined,
+                "outline-offset": "2px",
               }}
               rounded={props.imageRounded ?? true}
             >

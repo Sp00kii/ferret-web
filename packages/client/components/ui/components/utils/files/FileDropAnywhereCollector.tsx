@@ -66,6 +66,10 @@ const DimScreen = styled("div", {
     bottom: 0,
     position: "fixed",
     background: "rgba(0, 0, 0, 0.8)",
+    // Ferret mod: the dimmed overlay must not become the drag target itself,
+    // or it ends the drag it was shown for and flickers on and off
+    // (stoatchat/for-desktop#218)
+    pointerEvents: "none",
   },
 });
 
@@ -125,7 +129,11 @@ export function FileDropAnywhereCollector(props: Props) {
   /**
    * Handle cancelled drag event
    */
-  function onDragLeave() {
+  function onDragLeave(event: DragEvent) {
+    // Ferret mod: moving between parts of the page also fires dragleave;
+    // only hide once the drag really leaves the window
+    if (event.relatedTarget) return;
+
     // Make sure the timeout is properly cleaned up
     if (deferredHide) {
       clearTimeout(deferredHide);

@@ -4,6 +4,7 @@ import { PublicBot, PublicChannelInvite } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
 import { useClient } from "@revolt/client";
+import { discoverTheme } from "@revolt/ferret/discoverTheme"; // Ferret mod
 import { useModals } from "@revolt/modal";
 import { paramsFromPathname, useLocation, useNavigate } from "@revolt/routing";
 import { useState } from "@revolt/state";
@@ -35,7 +36,8 @@ export function Discover() {
             JSON.stringify({
               source: "revolt",
               type: "theme",
-              theme: {},
+              // Ferret mod: in Ferret's colours instead of Stoat's
+              theme: window.ferret ? discoverTheme() : {},
             }),
             "*",
           );

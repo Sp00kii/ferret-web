@@ -32,6 +32,7 @@ import {
   FerretVoice,
   IncomingCalls,
   QuickSwitcher,
+  RolePreviewBanner,
   WhatsNew,
 } from "@revolt/ferret"; // Ferret mod
 import { I18nProvider } from "@revolt/i18n";
@@ -151,6 +152,7 @@ function MountContext(props: { children?: JSX.Element }) {
                   <FerretMotion />
                   <QuickSwitcher />
                   <FerretNavigation />
+                  <RolePreviewBanner />
                 </QueryClientProvider>
               </VoiceContext>
             </SoundContext>

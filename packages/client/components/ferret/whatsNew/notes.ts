@@ -7,6 +7,41 @@ export type WhatsNewItem = { icon: string; title: string; text: string };
 
 export const WHATS_NEW: { version: string; items: WhatsNewItem[] }[] = [
   {
+    version: "1.0.12",
+    items: [
+      {
+        icon: "👁️",
+        title: "View server as a role",
+        text: "Server settings → Roles → a role → View server as this role. See what members with that role see; only you see the preview.",
+      },
+      {
+        icon: "🧭",
+        title: "Find new servers works",
+        text: "The Discover page loads again, in Ferret's colours.",
+      },
+      {
+        icon: "🎮",
+        title: "Discord status switch fixed",
+        text: "Turning it on or off now works straight away, no restart needed.",
+      },
+      {
+        icon: "🖼️",
+        title: "Drop images on avatars",
+        text: "Drag a picture onto your avatar, banner or server icon to upload it.",
+      },
+      {
+        icon: "🐛",
+        title: "Stoat bugs fixed",
+        text: "Emoji / GIF picker no longer hides under the call window, :cat: gives the cat emoji, dragging files in doesn't flicker, and spellcheck has a real Off.",
+      },
+      {
+        icon: "💻",
+        title: "Windows on ARM",
+        text: "An installer for ARM PCs (FerretSetup-arm64.exe on the release page).",
+      },
+    ],
+  },
+  {
     version: "1.0.11",
     items: [
       {

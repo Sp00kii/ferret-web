@@ -1,8 +1,8 @@
-import { For, createMemo } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 
 import { Trans, useLingui } from "@lingui/solid/macro";
 import { createFormControl, createFormGroup } from "solid-forms";
-import { API, Server, ServerRole } from "stoat.js";
+import { API, Server, ServerRole, setRolePreview } from "stoat.js";
 import { styled } from "styled-system/jsx";
 
 import { useClient } from "@revolt/client";
@@ -111,7 +111,7 @@ function RoleColourPicker(props: {
 export function ServerRoleEditor(props: { context: Server; roleId: string }) {
   const { t } = useLingui();
   const client = useClient();
-  const { openModal } = useModals();
+  const { openModal, closeAll } = useModals();
   const { navigate } = useSettingsNavigation();
   const instance = useInstance();
 
@@ -247,6 +247,23 @@ export function ServerRoleEditor(props: { context: Server; roleId: string }) {
         >
           <Trans>Copy role ID</Trans>
         </CategoryButton>
+        {/* Ferret mod: see the server the way members with this role do */}
+        <Show when={window.ferret}>
+          <CategoryButton
+            action="chevron"
+            icon={<Symbol size={20}>visibility</Symbol>}
+            description="See which channels and buttons members with only this role get. Only you see the preview; nothing changes for anyone."
+            onClick={() => {
+              setRolePreview({
+                serverId: props.context.id,
+                roleIds: [props.roleId],
+              });
+              closeAll();
+            }}
+          >
+            View server as this role
+          </CategoryButton>
+        </Show>
         <CategoryButton
           action="chevron"
           icon={<Symbol size={20}>delete</Symbol>}
